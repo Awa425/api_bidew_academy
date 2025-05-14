@@ -1,0 +1,1323 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "E-Learning API Documentation",
+        "description": "API Documentation for E-Learning Platform",
+        "contact": {
+            "email": "contact@example.com"
+        },
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/api/courses": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Get list of courses",
+                "description": "Returns list of courses",
+                "operationId": "getCoursesList",
+                "parameters": [
+                    {
+                        "name": "published_only",
+                        "in": "query",
+                        "description": "Filter published courses only",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Course"
+                                            }
+                                        },
+                                        "links": {
+                                            "type": "object"
+                                        },
+                                        "meta": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Create new course",
+                "description": "Create a new course",
+                "operationId": "createCourse",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Introduction to Programming"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Learn the basics of programming"
+                                    },
+                                    "category": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Programming"
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Beginner"
+                                    },
+                                    "image_path": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "path/to/image.jpg"
+                                    },
+                                    "duration_minutes": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "example": "120"
+                                    },
+                                    "is_published": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "true"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Course created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Course"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{id}": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Get course details",
+                "description": "Get detailed information about a course",
+                "operationId": "getCourse",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Course"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Update course",
+                "description": "Update an existing course",
+                "operationId": "updateCourse",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Updated Course Title"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Updated course description"
+                                    },
+                                    "category": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Programming"
+                                    },
+                                    "level": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Intermediate"
+                                    },
+                                    "image_path": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "path/to/updated/image.jpg"
+                                    },
+                                    "duration_minutes": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "example": "120"
+                                    },
+                                    "is_published": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "true"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Course updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Course"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{course_id}/evaluations": {
+            "get": {
+                "tags": [
+                    "Evaluations"
+                ],
+                "summary": "Get all evaluations for a course",
+                "description": "Returns list of evaluations for a specific course",
+                "operationId": "getEvaluations",
+                "parameters": [
+                    {
+                        "name": "course_id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Evaluation"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Evaluations"
+                ],
+                "summary": "Create new evaluation",
+                "description": "Create a new evaluation for a specific course",
+                "operationId": "createEvaluation",
+                "parameters": [
+                    {
+                        "name": "course_id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type",
+                                    "title",
+                                    "questions",
+                                    "total_points",
+                                    "passing_score",
+                                    "time_limit_minutes"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "quiz",
+                                            "qcm",
+                                            "essay"
+                                        ],
+                                        "example": "qcm"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Final Exam"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Final exam for the course"
+                                    },
+                                    "questions": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "question": {
+                                                    "type": "string",
+                                                    "example": "What is the capital of France?"
+                                                },
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "mcq",
+                                                        "tf",
+                                                        "essay"
+                                                    ],
+                                                    "example": "mcq"
+                                                },
+                                                "options": {
+                                                    "description": "Required for mcq type questions",
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "string",
+                                                        "example": "Paris"
+                                                    }
+                                                },
+                                                "correct_answer": {
+                                                    "type": "string",
+                                                    "example": "Paris"
+                                                },
+                                                "points": {
+                                                    "type": "integer",
+                                                    "example": "10"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "total_points": {
+                                        "type": "integer",
+                                        "example": "100"
+                                    },
+                                    "passing_score": {
+                                        "type": "integer",
+                                        "example": "60"
+                                    },
+                                    "time_limit_minutes": {
+                                        "type": "integer",
+                                        "example": "60"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Evaluation created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Evaluation"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/evaluations/{evaluation_id}/submit": {
+            "post": {
+                "tags": [
+                    "Evaluations"
+                ],
+                "summary": "Submit evaluation attempt",
+                "description": "Submit an evaluation attempt with answers",
+                "operationId": "submitEvaluation",
+                "parameters": [
+                    {
+                        "name": "evaluation_id",
+                        "in": "path",
+                        "description": "Evaluation ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "answers",
+                                    "time_taken_minutes"
+                                ],
+                                "properties": {
+                                    "answers": {
+                                        "type": "array",
+                                        "items": {
+                                            "properties": {
+                                                "question_id": {
+                                                    "type": "integer",
+                                                    "example": "1"
+                                                },
+                                                "answer": {
+                                                    "type": "string",
+                                                    "example": "Paris"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "time_taken_minutes": {
+                                        "type": "integer",
+                                        "example": "30"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Evaluation submitted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "properties": {
+                                                "score": {
+                                                    "type": "integer",
+                                                    "example": "85"
+                                                },
+                                                "total_points": {
+                                                    "type": "integer",
+                                                    "example": "100"
+                                                },
+                                                "is_passed": {
+                                                    "type": "boolean",
+                                                    "example": "true"
+                                                },
+                                                "time_taken_minutes": {
+                                                    "type": "integer",
+                                                    "example": "30"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{course_id}/lessons": {
+            "post": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Create new lesson",
+                "description": "Create a new lesson for a specific course",
+                "operationId": "createLesson",
+                "parameters": [
+                    {
+                        "name": "course_id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "content",
+                                    "order",
+                                    "duration_minutes"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Lesson 1: Introduction"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "<p>Lesson content here...</p>"
+                                    },
+                                    "order": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "example": "1"
+                                    },
+                                    "duration_minutes": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "example": "30"
+                                    },
+                                    "is_published": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "true"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Lesson created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Lesson"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/lessons/{id}": {
+            "put": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Update lesson",
+                "description": "Update an existing lesson",
+                "operationId": "updateLesson",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Lesson ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Updated Lesson Title"
+                                    },
+                                    "content": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "<p>Updated lesson content...</p>"
+                                    },
+                                    "order": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "example": "1"
+                                    },
+                                    "duration_minutes": {
+                                        "type": "integer",
+                                        "format": "int32",
+                                        "example": "30"
+                                    },
+                                    "is_published": {
+                                        "type": "boolean",
+                                        "format": "boolean",
+                                        "example": "true"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Lesson updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Lesson"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Lessons"
+                ],
+                "summary": "Delete lesson",
+                "description": "Delete an existing lesson",
+                "operationId": "deleteLesson",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Lesson ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Lesson deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lesson deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Lesson not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{course_id}/resources": {
+            "post": {
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Create new resource",
+                "description": "Create a new resource for a specific course",
+                "operationId": "createResource",
+                "parameters": [
+                    {
+                        "name": "course_id",
+                        "in": "path",
+                        "description": "Course ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "type",
+                                    "title",
+                                    "url",
+                                    "description"
+                                ],
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "link",
+                                            "software",
+                                            "guide"
+                                        ],
+                                        "example": "link"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Useful Resource"
+                                    },
+                                    "url": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://example.com/resource"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Description of the resource"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Resource created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resources/{id}": {
+            "put": {
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Update resource",
+                "description": "Update an existing resource",
+                "operationId": "updateResource",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Resource ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "link",
+                                            "software",
+                                            "guide"
+                                        ],
+                                        "example": "link"
+                                    },
+                                    "title": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Updated Resource"
+                                    },
+                                    "url": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://example.com/updated-resource"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "format": "string",
+                                        "example": "Updated resource description"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Resource updated successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Resource"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Validation error",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Resources"
+                ],
+                "summary": "Delete resource",
+                "description": "Delete an existing resource",
+                "operationId": "deleteResource",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Resource ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Resource deleted successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Resource deleted successfully"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Resource not found",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Resource not found"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Course": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "category": {
+                        "type": "string"
+                    },
+                    "level": {
+                        "type": "string"
+                    },
+                    "image_path": {
+                        "type": "string"
+                    },
+                    "duration_minutes": {
+                        "type": "integer"
+                    },
+                    "is_published": {
+                        "type": "boolean"
+                    },
+                    "user_id": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
+            },
+            "Lesson": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "content": {
+                        "type": "string"
+                    },
+                    "order": {
+                        "type": "integer"
+                    },
+                    "duration_minutes": {
+                        "type": "integer"
+                    },
+                    "is_published": {
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
+            },
+            "Resource": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "integer"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "link",
+                            "software",
+                            "guide"
+                        ]
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "url": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
+            },
+            "Evaluation": {
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "integer"
+                    },
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "quiz",
+                            "qcm",
+                            "essay"
+                        ]
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "questions": {
+                        "type": "array",
+                        "items": {
+                            "properties": {
+                                "question": {
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "mcq",
+                                        "tf",
+                                        "essay"
+                                    ]
+                                },
+                                "options": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "string"
+                                    }
+                                },
+                                "correct_answer": {
+                                    "type": "string"
+                                },
+                                "points": {
+                                    "type": "integer"
+                                }
+                            },
+                            "type": "object"
+                        }
+                    },
+                    "total_points": {
+                        "type": "integer"
+                    },
+                    "passing_score": {
+                        "type": "integer"
+                    },
+                    "time_limit_minutes": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "type": "http",
+                "bearerFormat": "JWT",
+                "scheme": "bearer"
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Evaluations",
+            "description": "API Endpoints of Evaluations"
+        },
+        {
+            "name": "Lessons",
+            "description": "API Endpoints of Lessons"
+        },
+        {
+            "name": "Resources",
+            "description": "API Endpoints of Resources"
+        },
+        {
+            "name": "Courses",
+            "description": "Courses"
+        }
+    ]
+}

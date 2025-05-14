@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('resources', function (Blueprint $table) {
-            $table->id();
-            $table->enum('type',['link','software','guide']);
-            $table->string('title');
-            $table->string('url');
-            $table->timestamps();
+        Schema::table('lessons', function (Blueprint $table) {
+            $table->integer('order')->default(0);
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('resources');
+        Schema::table('lessons', function (Blueprint $table) {
+            $table->dropColumn('order');
+        });
     }
 };

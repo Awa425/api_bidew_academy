@@ -29,12 +29,13 @@ class Course extends Model
         return $this->belongsTo(User::class);
     }
 
+
     /**
      * Get the lessons for the course.
      */
     public function lessons()
     {
-        return $this->hasMany(Lesson::class);
+        return $this->hasMany(Lesson::class)->orderBy('order');
     }
 
     /**
@@ -52,4 +53,8 @@ class Course extends Model
     {
         return $this->hasMany(Evaluation::class);
     }
+
+
+
+
 }
