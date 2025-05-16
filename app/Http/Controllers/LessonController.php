@@ -16,6 +16,16 @@ use Illuminate\Support\Facades\Validator;
 
 class LessonController extends Controller
 {
+
+    public function index($course)
+    { 
+        $lessons = Lesson::with(['course'])
+            ->where('course_id', $course)
+            ->paginate(10);
+
+        return response()->json($lessons);
+    }
+
     /**
      * @OA\Post(
      *      path="/api/courses/{course_id}/lessons",
@@ -72,16 +82,22 @@ class LessonController extends Controller
     public function store(Request $request, Course $course)
     {
         $validator = Validator::make($request->all(), [
-            'title' => 'required|string|max:255',
+            'title' => 'required|string',
             'content' => 'required|string',
-            'order' => 'required|integer',
-            'duration_minutes' => 'required|integer|min:1',
+            // 'course_id' => 'required|exists:courses,id',
+            'order' => 'nullable|integer',
+            'duration_minutes' => 'nullable|integer|min:1',
             'is_published' => 'boolean'
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
+
+        // $data = $request->all();
+        // $data['user_id'] = auth()->id();
+        $lesson = $request->all();
+        $lesson['course_id'] = $course->id;
 
         $lesson = $course->lessons()->create($request->all());
         return response()->json($lesson, 201);

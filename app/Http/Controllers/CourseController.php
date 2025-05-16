@@ -327,8 +327,8 @@ class CourseController extends Controller
      *      )
      * )
      */
-    public function update(Request $request, Course $course)
-    { 
+    public function update(Request $request, $course)
+    {  
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|required|string',
             'description' => 'sometimes|required|string',
@@ -339,9 +339,12 @@ class CourseController extends Controller
             'is_published' => 'sometimes|boolean'
         ]);
 
-        if ($validator) {
+        
+        if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
+        $course = Course::find($course);
+
         $course->update($request->all());
 
         return response()->json($course);
