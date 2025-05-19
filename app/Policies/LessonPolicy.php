@@ -32,9 +32,4 @@ class LessonPolicy
     {
         return $user->id === $lesson->course->user_id;
     }
-
-
-
-
-
 }

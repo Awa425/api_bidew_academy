@@ -12,7 +12,8 @@ class Lesson extends Model
         'order',
         'duration_minutes',
         'is_published',
-        'course_id'
+        'course_id',
+        'is_locked',
     ];
 
     /**
@@ -21,5 +22,10 @@ class Lesson extends Model
     public function course()
     {
         return $this->belongsTo(Course::class, 'course_id');
+    }
+
+    public function contents()
+    {
+        return $this->hasMany(Content::class);
     }
 }

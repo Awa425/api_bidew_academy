@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('contents', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
-            $table->enum('type',['text','video','pdf'])->default('text');
-            $table->longText('body');
+            $table->foreignId('lesson_id')->constrained()->onDelete('cascade');
+            $table->enum('type', ['text', 'video', 'pdf', 'link']);
+            $table->longText('data')->nullable(); // texte brut ou HTML
+            $table->string('file_path')->nullable(); // pour les fichiers
+            $table->string('external_url')->nullable(); // pour les vidéos externes ou liens
             $table->timestamps();
         });
     }

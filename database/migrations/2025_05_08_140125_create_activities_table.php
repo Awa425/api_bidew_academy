@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('activities', function (Blueprint $table) {
             $table->id();
             $table->enum('type',['quiz','simulation']);
-            $table->json('config');          // structure du quiz ou scénario
+            $table->json('config');          
             $table->timestamps();
         });
     }
