@@ -11,19 +11,13 @@ use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * @OA\Tag(
- *      name="Lessons",
- *      description="API Endpoints of Lessons"
- * )
- */
 
 class LessonController extends Controller
 {
 
     public function index($course)
     { 
-        $lessons = Lesson::with(['course'])
+        $lessons = Lesson::with(['course','contents','resources'])
             ->where('course_id', $course)
             ->paginate(10);
 
@@ -53,60 +47,8 @@ class LessonController extends Controller
     }
 
 
-    /**
-     * @OA\Post(
-     *      path="/api/courses/{course_id}/lessons",
-     *      operationId="createLesson",
-     *      tags={"Lessons"},
-     *      summary="Create new lesson",
-     *      description="Create a new lesson for a specific course",
-     *      security={
-     *          {"bearerAuth": {}}
-     *      },
-     *      @OA\Parameter(
-     *          name="course_id",
-     *          description="Course ID",
-     *          required=true,
-     *          in="path",
-     *          @OA\Schema(
-     *              type="integer"
-     *          )
-     *      ),
-     *      @OA\RequestBody(
-     *          required=true,
-     *          @OA\JsonContent(
-     *              required={"title", "content", "order", "duration_minutes"},
-     *              @OA\Property(property="title", type="string", format="string", example="Lesson 1: Introduction"),
-     *              @OA\Property(property="content", type="string", format="string", example="<p>Lesson content here...</p>"),
-     *              @OA\Property(property="order", type="integer", format="int32", example="1"),
-     *              @OA\Property(property="duration_minutes", type="integer", format="int32", example="30"),
-     *              @OA\Property(property="is_published", type="boolean", format="boolean", example="true")
-     *          ),
-     *      ),
-     *      @OA\Response(
-     *          response=201,
-     *          description="Lesson created successfully",
-     *          @OA\MediaType(
-     *              mediaType="application/json",
-     *              @OA\Schema(
-     *                  type="object",
-     *                  @OA\Property(
-     *                      property="data",
-     *                      ref="#/components/schemas/Lesson"
-     *                  )
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=422,
-     *          description="Validation error",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="errors", type="object")
-     *          )
-     *      )
-     * )
-     */
-  public function store(Request $request, Course $course)
+   
+   public function store(Request $request, Course $course)
 {
     // Vérification de l'autorisation
     $userId = auth()->id();
@@ -160,59 +102,8 @@ class LessonController extends Controller
     ], 201);
 }
 
-    /**
-     * @OA\Put(
-     *      path="/api/lessons/{id}",
-     *      operationId="updateLesson",
-     *      tags={"Lessons"},
-     *      summary="Update lesson",
-     *      description="Update an existing lesson",
-     *      security={
-     *          {"bearerAuth": {}}
-     *      },
-     *      @OA\Parameter(
-     *          name="id",
-     *          description="Lesson ID",
-     *          required=true,
-     *          in="path",
-     *          @OA\Schema(
-     *              type="integer"
-     *          )
-     *      ),
-     *      @OA\RequestBody(
-     *          required=true,
-     *          @OA\JsonContent(
-     *              @OA\Property(property="title", type="string", format="string", example="Updated Lesson Title"),
-     *              @OA\Property(property="content", type="string", format="string", example="<p>Updated lesson content...</p>"),
-     *              @OA\Property(property="order", type="integer", format="int32", example="1"),
-     *              @OA\Property(property="duration_minutes", type="integer", format="int32", example="30"),
-     *              @OA\Property(property="is_published", type="boolean", format="boolean", example="true")
-     *          ),
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Lesson updated successfully",
-     *          @OA\MediaType(
-     *              mediaType="application/json",
-     *              @OA\Schema(
-     *                  type="object",
-     *                  @OA\Property(
-     *                      property="data",
-     *                      ref="#/components/schemas/Lesson"
-     *                  )
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=422,
-     *          description="Validation error",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="errors", type="object")
-     *          )
-     *      )
-     * )
-     */
-    public function update(Request $request, Lesson $lesson)
+   
+     public function update(Request $request, Lesson $lesson)
     {
         // Vérifier si l'utilisateur peut mettre à jour la leçon
         $userId = auth()->id();
@@ -244,45 +135,8 @@ class LessonController extends Controller
         return response()->json($lesson);
     }
 
-    /**
-     * Delete a lesson.
-     */
-    /**
-     * @OA\Delete(
-     *      path="/api/lessons/{id}",
-     *      operationId="deleteLesson",
-     *      tags={"Lessons"},
-     *      summary="Delete lesson",
-     *      description="Delete an existing lesson",
-     *      security={
-     *          {"bearerAuth": {}}
-     *      },
-     *      @OA\Parameter(
-     *          name="id",
-     *          description="Lesson ID",
-     *          required=true,
-     *          in="path",
-     *          @OA\Schema(
-     *              type="integer"
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Lesson deleted successfully",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Lesson deleted successfully")
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=404,
-     *          description="Lesson not found",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Lesson not found")
-     *          )
-     *      )
-     * )
-     */
-    public function destroy(Lesson $lesson)
+  
+       public function destroy(Lesson $lesson)
     {
         $lesson->delete();
         return response()->json(null, 204);

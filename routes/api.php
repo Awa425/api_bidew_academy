@@ -14,42 +14,40 @@ use Illuminate\Support\Facades\Route;
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
-// Access : Auth
+// User Routes
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('users', UserController::class);
     Route::get('profile', function (Request $request) {return $request->user(); });
     Route::post('logout', [AuthController::class, 'logout']);
 });
 
-// Access : Auth et Role Admin
+// Cours Routes
 Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
     Route::get('courses/{id}', [CourseController::class, 'show']);
     Route::post('courses', [CourseController::class, 'store']);
     Route::put('courses/{id}', [CourseController::class, 'update']);
 });
-// Route publique pour Courses
 Route::get('courses', [CourseController::class, 'index']);
 
-// Routes pour les leçons (authentification requise)
+// Lessons routes
 Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
     Route::post('courses/{course}/lessons', [LessonController::class, 'store']);
     Route::put('lessons/{lesson}', [LessonController::class, 'update']);
     Route::delete('/lessons/{lesson}', [LessonController::class, 'destroy']);
 });
-// Routes publiques pour les leçons
 Route::get('courses/{course}/lessons', [LessonController::class, 'index']);
 Route::get('courses/{course}/lessons/{lesson}', [LessonController::class, 'show']);
 
 // Routes pour les ressources (authentification requise)
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/courses/{course}/resources', [ResourceController::class, 'store']);
-    Route::put('/resources/{resource}', [ResourceController::class, 'update']);
+    Route::post('lesson/{lesson}/resources', [ResourceController::class, 'store']);
+    Route::put('cours/{cours}/lesson/{lesson}/resources/{resource}', [ResourceController::class, 'update']);
     Route::delete('/resources/{resource}', [ResourceController::class, 'destroy']);
-    Route::post('/courses/{course}/evaluations', [EvaluationController::class, 'store']);
+    Route::post('/lesson/{lesson}/evaluations', [EvaluationController::class, 'store']);
 });
 // Routes publiques pour les ressources
-Route::get('courses/{course}/resources', [ResourceController::class, 'index']);
-Route::get('courses/{course}/resources/{resource}', [ResourceController::class, 'show']);
+Route::get('lesson/{lesson}/resources', [ResourceController::class, 'index']);
+Route::get('lesson/{lesson}/resources/{resource}', [ResourceController::class, 'show']);
 
 // Routes pour les évaluations
 Route::get('/courses/{course}/evaluations', [EvaluationController::class, 'index']);

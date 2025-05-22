@@ -6,14 +6,17 @@ use Illuminate\Database\Eloquent\Model;
 
 class Resource extends Model
 {
-    protected $fillable = ['type', 'title', 'url', 'course_id'];
-
-    /**
-     * Get the course that owns the resource.
-     */
-    public function course()
+        protected $fillable = [
+        'lesson_id',
+        'title',
+        'type',
+        'path',
+        'description',
+        'is_downloadable',
+    ];
+    public function lesson()
     {
-        return $this->belongsTo(Course::class);
+        return $this->belongsTo(Lesson::class);
     }
 
  

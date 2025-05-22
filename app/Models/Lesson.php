@@ -28,4 +28,9 @@ class Lesson extends Model
     {
         return $this->hasMany(Content::class);
     }
+
+    public function resources()
+{
+    return $this->hasMany(Resource::class);
+}
 }

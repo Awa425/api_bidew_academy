@@ -7,53 +7,30 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
-/**
- * @OA\Tag(
- *      name="Auth",
- *      description="API Endpoints for Authentication"
- * )
- */
 class AuthController extends Controller
 {
-    /**
-     * @OA\Post(
-     *      path="/api/register",
-     *      operationId="registerUser",
-     *      tags={"Auth"},
-     *      summary="Register a new user",
-     *      description="Register a new user account",
-     *      @OA\RequestBody(
-     *          required=true,
-     *          @OA\JsonContent(
-     *              required={"name", "email", "password", "role"},
-     *              @OA\Property(property="name", type="string", example="Issa Sarr"),
-     *              @OA\Property(property="email", type="string", format="email", example="issa@gmail.com"),
-     *              @OA\Property(property="password", type="string", format="password", example="passer"),
-     *              @OA\Property(property="role", type="string", enum={"admin", "formateur", "apprenant"}, example="apprenant")
-     *          ),
-     *      ),
-     *      @OA\Response(
-     *          response=201,
-     *          description="User registered successfully",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="User registered successfully"),
-     *              @OA\Property(property="user", type="object",
-     *                  @OA\Property(property="id", type="integer", example=1),
-     *                  @OA\Property(property="name", type="string", example="John Doe"),
-     *                  @OA\Property(property="email", type="string", example="john@example.com"),
-     *                  @OA\Property(property="role", type="string", example="apprenant")
-     *              )
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=422,
-     *          description="Validation error",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="errors", type="object")
-     *          )
-     *      )
-     * )
-     */
+/**
+ * @OA\Post(
+ *      path="/api/register",
+ *      operationId="createUser",
+ *      tags={"Inscription"},
+ *      summary="S'inscripre",
+ *      description="Inscription d'un nouvel utilisateur", 
+ *      @OA\RequestBody(
+ *          required=true,
+ *          @OA\JsonContent(ref="#/components/schemas/User")
+ *      ),
+ *      @OA\Response(
+ *          response=200,
+ *          description="Succès",
+ *          @OA\JsonContent(ref="#/components/schemas/User")
+ *      ),
+ *      @OA\Response(
+ *          response=400,
+ *          description="Erreur de validation"
+ *      )
+ * )
+ */
     public function register(Request $request)
     {
         $request->validate([
@@ -78,38 +55,50 @@ class AuthController extends Controller
         ], 201);
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/login",
-     *      operationId="loginUser",
-     *      tags={"Auth"},
-     *      summary="Login user",
-     *      description="Login user and return JWT token",
-     *      @OA\RequestBody(
-     *          required=true,
-     *          @OA\JsonContent(
-     *              required={"email", "password"},
-     *              @OA\Property(property="email", type="string", format="email", example="john@example.com"),
-     *              @OA\Property(property="password", type="string", format="password", example="password123")
-     *          ),
-     *      ),
-     *      @OA\Response(
-     *          response=200,
-     *          description="Login successful",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Login successful"),
-     *              @OA\Property(property="token", type="string", example="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...")
-     *          )
-     *      ),
-     *      @OA\Response(
-     *          response=401,
-     *          description="Unauthorized",
-     *          @OA\JsonContent(
-     *              @OA\Property(property="message", type="string", example="Invalid credentials")
-     *          )
-     *      )
-     * )
-     */
+   /**
+ * @OA\Post(
+ *      path="/api/login",
+ *      operationId="login",
+ *      tags={"login"},
+ *      summary="Se connecter",
+ *      description="Permet a l'utilisateur de se connecter avec son email et un mot de passe.", 
+ *      @OA\RequestBody(
+ *          required=true,
+ *          @OA\JsonContent(
+ *              type="object",
+ *              required={"email", "password"},
+ *              @OA\Property(
+ *                  property="email",
+ *                  type="string",
+ *                  example="admin@bidew.com",
+ *                  description="Email votre email"
+ *              ),
+ *              @OA\Property(
+ *                  property="password",
+ *                  type="string",
+ *                  example="passer"
+ *              )
+ *          )
+ *      ),
+ *      @OA\Response(
+ *          response=200,
+ *          description="Connexion réussie",
+ *          @OA\JsonContent(
+ *              type="object",
+ *              @OA\Property(property="token", type="string"),
+ *              @OA\Property(property="data", type="object")
+ *          )
+ *      ),
+ *      @OA\Response( 
+ *          response=401,
+ *          description="Email ou mot de passe incorrects"
+ *      ),
+ *      @OA\Response( 
+ *          response=422,
+ *          description="Erreur de validation"
+ *      )
+ * )
+ */
     public function login(Request $request)
     {
         $request->validate([
@@ -133,6 +122,7 @@ class AuthController extends Controller
         ]);
     }
 
+    
     public function logout(Request $request)
     {
         $request->user()->tokens()->delete();

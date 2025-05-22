@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('resources', function (Blueprint $table) {
             $table->id();
-            $table->enum('type',['link','software','guide']);
+            $table->foreignId('lesson_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->string('url');
+            $table->enum('type', ['pdf', 'video', 'link']);
+            $table->string('path')->nullable(); // Pour fichiers ou liens externes
+            $table->text('description')->nullable();
+            $table->boolean('is_downloadable')->default(false);
             $table->timestamps();
         });
     }
