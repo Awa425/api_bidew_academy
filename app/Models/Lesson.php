@@ -8,7 +8,6 @@ class Lesson extends Model
 {
     protected $fillable = [
         'title',
-        'content',
         'order',
         'duration_minutes',
         'is_published',

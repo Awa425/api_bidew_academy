@@ -15,10 +15,12 @@ use Illuminate\Support\Facades\Validator;
 class LessonController extends Controller
 {
 
+
     public function index($course)
     { 
         $lessons = Lesson::with(['course','contents','resources'])
             ->where('course_id', $course)
+            ->orderBy('id','desc')
             ->paginate(10);
 
         return response()->json($lessons);
@@ -48,9 +50,8 @@ class LessonController extends Controller
 
 
    
-   public function store(Request $request, Course $course)
+public function store(Request $request, Course $course)
 {
-    // Vérification de l'autorisation
     $userId = auth()->id();
     if ($userId !== $course->user_id) {
         return response()->json([
@@ -58,19 +59,17 @@ class LessonController extends Controller
         ], 403);
     }
 
-    // Validation de la leçon
+    // Validation
     $validator = Validator::make($request->all(), [
         'title' => 'required|string',
         'order' => 'nullable|integer',
         'duration_minutes' => 'nullable|integer|min:1',
         'is_published' => 'boolean',
         'is_locked' => 'boolean',
-        
-        // Validation du contenu associé
         'content.type' => 'required|in:text,video,pdf,link',
         'content.data' => 'nullable|string',
-        'content.file_path' => 'nullable|string',
         'content.external_url' => 'nullable|url',
+        'content.file' => 'nullable|file|mimes:pdf,mp4,avi,mov|max:20480' // max 20MB
     ]);
 
     if ($validator->fails()) {
@@ -87,20 +86,26 @@ class LessonController extends Controller
         'is_locked' => $request->input('is_locked', false),
     ]);
 
-    // Création du contenu lié
-    if ($request->has('content')) {
-        $lesson->contents()->create([
-            'type' => $request->input('content.type'),
-            'data' => $request->input('content.data'),
-            'file_path' => $request->input('content.file_path'),
-            'external_url' => $request->input('content.external_url'),
-        ]);
+    // Traitement du fichier s'il est fourni
+    $filePath = null;
+    if ($request->hasFile('content.file')) {
+        $file = $request->file('content.file');
+        $filePath = $file->store('lessons/files', 'public');
     }
 
+    // Création du contenu lié
+    $lesson->contents()->create([
+        'type' => $request->input('content.type'),
+        'data' => $request->input('content.data'),
+        'file_path' => $filePath,
+        'external_url' => $request->input('content.external_url'),
+    ]);
+
     return response()->json([
-        'lesson' => $lesson->load('contents'), // retourne la leçon avec les contenus liés
+        'lesson' => $lesson->load('contents'),
     ], 201);
 }
+
 
    
      public function update(Request $request, Lesson $lesson)
@@ -120,7 +125,6 @@ class LessonController extends Controller
 
         $validator = Validator::make($request->all(), [
             'title' => 'sometimes|required|string|max:255',
-            'content' => 'sometimes|required|string',
             'order' => 'sometimes|required|integer',
             'duration_minutes' => 'sometimes|required|integer|min:1',
             'is_published' => 'sometimes|boolean',

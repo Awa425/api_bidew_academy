@@ -11,10 +11,11 @@ class CourseController extends Controller
    
     public function index()
     { 
-        $courses = Course::with(['lessons', 'resources', 'evaluations'])
+        $courses = Course::with(['lessons.contents', 'resources', 'evaluations'])
             ->when(request('published_only'), function ($query) {
                 $query->where('is_published', true);
             })
+            
             ->paginate(10);
 
         return response()->json($courses);
