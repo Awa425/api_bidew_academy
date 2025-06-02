@@ -9,12 +9,15 @@ class Course extends Model
     protected $fillable = [
         'title',
         'description',
+        'prerequis',
+        'objectif',
+        'progression',
         'category',
         'level',
         'image_path',
         'duration_minutes',
         'is_published',
-        'user_id'
+        'user_id',
     ];
 
     protected $casts = [

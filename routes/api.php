@@ -30,6 +30,9 @@ Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
     Route::post('courses', [CourseController::class, 'store']);
     Route::put('courses/{id}', [CourseController::class, 'update']);
 });
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('courses/{id}', [CourseController::class, 'show']);
+});
 Route::get('courses', [CourseController::class, 'index']);
 
 // Lessons routes

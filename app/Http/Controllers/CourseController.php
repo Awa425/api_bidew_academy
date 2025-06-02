@@ -26,7 +26,7 @@ class CourseController extends Controller
  *      path="/api/courses",
  *      operationId="createCours",
  *      tags={"Cours"},
- *      summary="Ajouter un cours",
+ *      summary="Publier un cours",
  *      description="Ajouter un cours",
  *      security={{"bearerAuth":{}}},  
  *      @OA\RequestBody(
@@ -44,11 +44,14 @@ class CourseController extends Controller
  *      )
  * )
  */
- public function store(Request $request)
+public function store(Request $request)
 {
     $validator = Validator::make($request->all(), [
         'title' => 'required|string',
         'description' => 'nullable|string',
+        'prerequis' => 'nullable|string',
+        'objectif' => 'nullable|string',
+        'progression' => 'nullable|integer|min:0|max:100',
         'category' => 'nullable|string',
         'level' => 'nullable|string',
         'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -64,24 +67,21 @@ class CourseController extends Controller
         return response()->json(['error' => 'User must be authenticated'], 401);
     }
 
-    $data = $request->except('image_path'); // on exclut d’abord l’image
+    $data = $request->except('image_path');
 
-    // Enregistrement de l’image dans public/uploads/courses
     if ($request->hasFile('image_path')) {
         $image = $request->file('image_path');
         $imageName = time() . '_' . $image->getClientOriginalName();
         $image->move(public_path('uploads/courses'), $imageName);
-        $data['image_path'] = 'uploads/courses/' . $imageName; // stocke le chemin relatif
+        $data['image_path'] = 'uploads/courses/' . $imageName;
     }
 
     $data['user_id'] = auth()->id();
+    
     $course = Course::create($data);
 
     return response()->json($course, 201);
 }
-
-
-
 
   
     public function show($course_id)
@@ -91,7 +91,7 @@ class CourseController extends Controller
         if (is_null($course)) {
             return $this->sendError('Course not found.');
         }
-        return response()->json($course->load('user','lessons', 'resources', 'evaluations'));
+        return response()->json($course->load('user','lessons.contents', 'resources', 'evaluations'));
         
     }
 
@@ -116,7 +116,7 @@ class CourseController extends Controller
 
         $course->update($request->all());
 
-        return response()->json($course);
+        return response()->json($course->load('user','lessons.contents', 'resources', 'evaluations'));
     }
 
     public function destroy(Course $course)
