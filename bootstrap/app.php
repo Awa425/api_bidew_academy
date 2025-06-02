@@ -17,6 +17,13 @@ return Application::configure(basePath: dirname(__DIR__))
             // Enregistrement du middleware role
             'role' => \App\Http\Middleware\RoleMiddleware::class,
         ]);
+        
+        // Configuration CORS
+        $middleware->validateCsrfTokens(except: [
+            '*',
+        ]);
+        
+        $middleware->trustProxies(at: '*');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

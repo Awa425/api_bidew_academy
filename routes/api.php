@@ -6,6 +6,7 @@ use App\Http\Controllers\CourseController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\SocialAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 // Route publique 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/auth/google', [SocialAuthController::class, 'handleGoogleLogin']);
+Route::get('/auth/google/callback', [SocialAuthController::class, 'redirectToGoogle']);
 
 // User Routes
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -53,3 +56,4 @@ Route::get('lesson/{lesson}/resources/{resource}', [ResourceController::class, '
 Route::get('/courses/{course}/evaluations', [EvaluationController::class, 'index']);
 Route::post('/evaluations/{evaluation}/submit', [EvaluationController::class, 'submit']);
 
+// Route::post('/auth/google-login', [SocialAuthController::class, 'handleGoogleCallback']);
