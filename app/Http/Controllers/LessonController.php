@@ -29,7 +29,6 @@ class LessonController extends Controller
     public function show(Course $course, Lesson $lesson)
     {
         $user = auth()->user();
-
         if ($lesson->is_locked) {
             // Vérifie si l'utilisateur a terminé les leçons précédentes
             $previousLessons = $course->lessons()

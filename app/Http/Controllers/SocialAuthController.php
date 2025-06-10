@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 use Google_Client;
 
 class SocialAuthController extends Controller
@@ -20,7 +19,6 @@ class SocialAuthController extends Controller
      */
     public function handleGoogleLogin(Request $request)
     {
-        // Log::info('Google login attempt', ['data' => $request->all()]);
         try {
             $request->validate([
                 'id_token' => 'required|string',
@@ -49,39 +47,30 @@ class SocialAuthController extends Controller
                 ], 400);
             }
 
-            // Log::info('Google payload', ['payload' => $payload]);
-
             // Vérifier si l'utilisateur existe déjà
             $user = User::where('email', $payload['email'])->first();
             
             if (!$user) {
-                // Créer un nouvel utilisateur s'il n'existe pas
                 $user = User::create([
                     'name' => $payload['name'] ?? $payload['email'],
                     'email' => $payload['email'],
                     'google_id' => $payload['sub'],
                     'password' => Hash::make("passer"),
                     'email_verified_at' => now(),
-                    'role' => 'apprenant' // Définir un rôle par défaut
+                    'role' => 'apprenant'
                 ]);
-                // Log::info('New user created', ['user_id' => $user->id]);
+            
             } else {
-                // Mettre à jour l'ID Google si nécessaire
                 if (empty($user->google_id)) {
                     $user->google_id = $payload['sub'];
                     $user->save();
                 }
             }
-            // Connecter l'utilisateur
             Auth::login($user);
             
             
-            // Créer un token d'authentification
             $token = $user->createToken('auth-token')->plainTextToken;
             
-
-            // Log::info('User logged in successfully', ['user_id' => $user->id]);
-
             $result = response()->json([
                 'success' => true,
                 'user' => [
@@ -91,7 +80,6 @@ class SocialAuthController extends Controller
                     'role' => $user->role
                 ],
                 'token' => $token,
-                // 'token_type' => 'Bearer',
                 'message' => 'Connexion réussie avec Google.'
             ]);
             return $result;
