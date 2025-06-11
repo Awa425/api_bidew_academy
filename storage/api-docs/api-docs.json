@@ -75,7 +75,7 @@
                                     "email": {
                                         "description": "Email votre email",
                                         "type": "string",
-                                        "example": "admin@bidew.com"
+                                        "example": "diopawa425@gmail.com"
                                     },
                                     "password": {
                                         "type": "string",
@@ -116,36 +116,93 @@
             }
         },
         "/api/courses": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Lister tous les cours",
+                "operationId": "02eeda67042dba2d22a517f26fb8eaf1",
+                "responses": {
+                    "200": {
+                        "description": "Liste des cours",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Course"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "tags": [
-                    "Cours"
+                    "Courses"
                 ],
-                "summary": "Ajouter un cours",
-                "description": "Ajouter un cours",
-                "operationId": "createCours",
+                "summary": "Créer un nouveau cours",
+                "operationId": "a4d6b7e7be59571034428ffbb86aaf0a",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Cours"
+                                "$ref": "#/components/schemas/Course"
                             }
                         }
                     }
                 },
                 "responses": {
-                    "200": {
-                        "description": "Succès",
+                    "201": {
+                        "description": "Cours créé avec succès",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Cours"
+                                    "$ref": "#/components/schemas/Course"
                                 }
                             }
                         }
                     },
                     "400": {
-                        "description": "Erreur de validation"
+                        "description": "Données invalides"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{id}": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Get course details",
+                "operationId": "f170bd35e3106c9d9bf5807499c80b68",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
@@ -165,7 +222,7 @@
                     "email": {
                         "description": "Login Email ou Telephone",
                         "type": "string",
-                        "example": "admin@bidew.com"
+                        "example": "diopawa425@gmail.com"
                     },
                     "password": {
                         "description": "Mot de passe",
@@ -175,66 +232,276 @@
                 },
                 "type": "object"
             },
-            "Cours": {
-                "title": "Cours",
-                "description": "Les Cours",
+            "Content": {
+                "required": [
+                    "id",
+                    "type"
+                ],
                 "properties": {
-                    "title": {
-                        "description": "Titre du cours",
+                    "id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "lesson_id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "type": {
                         "type": "string",
-                        "example": "Cours de Securité"
+                        "example": "pdf"
+                    },
+                    "data": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "example": "lessons/files/example.pdf"
+                    },
+                    "external_url": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
+            },
+            "Course": {
+                "title": "Course",
+                "required": [
+                    "id",
+                    "title",
+                    "description",
+                    "progression",
+                    "category",
+                    "level",
+                    "duration_minutes",
+                    "is_published",
+                    "user"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Initiation de base a l'informatique"
                     },
                     "description": {
-                        "description": "description du cours",
                         "type": "string",
-                        "example": "Ce cours parle sur la securité..."
+                        "example": "Learn the basics of Informatique"
+                    },
+                    "prerequis": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "objectif": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "progression": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0
                     },
                     "category": {
-                        "description": "Category du cours",
                         "type": "string",
-                        "example": "category qu appartient a ce cours"
+                        "example": "Word"
                     },
                     "level": {
-                        "description": "Niveau du cours",
                         "type": "string",
-                        "example": "Debutant"
+                        "example": "Beginner"
                     },
                     "image_path": {
-                        "description": "Image associée",
                         "type": "string",
-                        "example": "path_image"
+                        "nullable": true
                     },
                     "duration_minutes": {
-                        "description": "duration minutes",
+                        "type": "integer",
+                        "example": 160
+                    },
+                    "is_published": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "user_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "created_at": {
                         "type": "string",
-                        "example": "24h"
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    },
+                    "lessons": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Lesson"
+                        }
+                    },
+                    "resources": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    },
+                    "evaluations": {
+                        "type": "array",
+                        "items": {
+                            "type": "object"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Lesson": {
+                "required": [
+                    "id",
+                    "title",
+                    "order",
+                    "duration_minutes"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Introduction à Laravel"
+                    },
+                    "course_id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "order": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "duration_minutes": {
+                        "type": "integer",
+                        "example": 60
+                    },
+                    "is_published": {
+                        "type": "boolean",
+                        "example": false
+                    },
+                    "is_locked": {
+                        "type": "boolean",
+                        "example": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "contents": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Content"
+                        }
+                    }
+                },
+                "type": "object"
+            },
+            "Progression": {
+                "title": "Progression",
+                "description": "Progression du cours",
+                "properties": {
+                    "user_id": {
+                        "description": "Utilisateur associé",
+                        "type": "integer",
+                        "example": "1"
+                    },
+                    "cours_id": {
+                        "description": "Utilisateur associé",
+                        "type": "integer",
+                        "example": "1"
+                    },
+                    "current_lesson_id": {
+                        "description": "current lesson",
+                        "type": "integer",
+                        "example": "1"
+                    },
+                    "completed_lessons": {
+                        "description": "Lesson terminés",
+                        "type": "array",
+                        "items": {
+                            "type": "integer",
+                            "example": "1"
+                        }
+                    },
+                    "progress_percent": {
+                        "description": "Pourcentage",
+                        "type": "integer",
+                        "example": "1"
+                    },
+                    "started_at": {
+                        "description": "Date de debut",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2025-01-15"
                     }
                 },
                 "type": "object"
             },
             "User": {
-                "title": "User",
-                "description": "Schéma pour un utilisateur",
+                "required": [
+                    "id",
+                    "name",
+                    "email"
+                ],
                 "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
                     "name": {
-                        "description": "Nom complet de l'utilisateur",
                         "type": "string",
                         "example": "Awa Diop"
                     },
                     "email": {
-                        "description": "Email de l'utilisateur",
                         "type": "string",
-                        "example": "admin@bidew.com"
+                        "format": "email",
+                        "example": "diopawa192@gmail.com"
                     },
-                    "password": {
-                        "description": "Mot de passe de l'utilisateur",
+                    "email_verified_at": {
                         "type": "string",
-                        "example": "password"
+                        "format": "date-time",
+                        "nullable": true
                     },
                     "role": {
-                        "description": "Role associée",
                         "type": "string",
-                        "example": "formateur"
+                        "example": "admin"
+                    },
+                    "google_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -259,8 +526,8 @@
             "description": "login"
         },
         {
-            "name": "Cours",
-            "description": "Cours"
+            "name": "Courses",
+            "description": "Courses"
         }
     ]
 }

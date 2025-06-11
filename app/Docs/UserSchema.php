@@ -4,32 +4,15 @@ namespace App\Docs;
  * @OA\Schema(
  *     schema="User",
  *     type="object",
- *     title="User",
- *     description="Schéma pour un utilisateur",
- *     @OA\Property(
- *         property="name",
- *         type="string",
- *         description="Nom complet de l'utilisateur",
- *         example="Awa Diop"
- *     ),
- *     @OA\Property(
- *         property="email",
- *         type="string",
- *         description="Email de l'utilisateur",
- *         example="admin@bidew.com"
- *     ),
-  *     @OA\Property(
- *         property="password",
- *         type="string",
- *         description="Mot de passe de l'utilisateur",
- *         example="password"
- *     ),
- *     @OA\Property(
- *         property="role",
- *         type="string", 
- *         description="Role associée",
- *         example="formateur"
- *     )
+ *     required={"id", "name", "email"},
+ *     @OA\Property(property="id", type="integer", example=1),
+ *     @OA\Property(property="name", type="string", example="Awa Diop"),
+ *     @OA\Property(property="email", type="string", format="email", example="diopawa192@gmail.com"),
+ *     @OA\Property(property="email_verified_at", type="string", format="date-time", nullable=true),
+ *     @OA\Property(property="role", type="string", example="admin"),
+ *     @OA\Property(property="google_id", type="string", nullable=true),
+ *     @OA\Property(property="created_at", type="string", format="date-time"),
+ *     @OA\Property(property="updated_at", type="string", format="date-time")
  * )
  */
 class UserSchema {}

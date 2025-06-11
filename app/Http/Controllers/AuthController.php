@@ -70,7 +70,7 @@ class AuthController extends Controller
  *              @OA\Property(
  *                  property="email",
  *                  type="string",
- *                  example="admin@bidew.com",
+ *                  example="diopawa425@gmail.com",
  *                  description="Email votre email"
  *              ),
  *              @OA\Property(

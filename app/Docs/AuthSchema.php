@@ -10,7 +10,7 @@ namespace App\Docs;
  *         property="email",
  *         type="string",
  *         description="Login Email ou Telephone",
- *         example="admin@bidew.com"
+ *         example="diopawa425@gmail.com"
  *     ),
  *     @OA\Property(
  *         property="password",
