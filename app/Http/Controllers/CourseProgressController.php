@@ -16,7 +16,6 @@ class CourseProgressController extends Controller
         $lessonId = $request->input('lesson_id');
         // Vérifier que le cours et la leçon existent et sont liés
         $course = Course::with('lessons')->findOrFail($courseId);
-        // dd($course);
         $lesson = $course->lessons()->findOrFail($lessonId);
 
         // Récupérer ou créer l'enregistrement de progression
@@ -24,6 +23,15 @@ class CourseProgressController extends Controller
             'user_id' => $user,
             'course_id' => $course->id
         ]);
+
+        // Changer etat is_locked du cours
+        $lesson->is_locked = false;
+        $lesson->update();
+        $lessonSuivant = $course->lessons()->where('order', '>' , $lesson->order)
+                                           ->orderBy('order', 'asc')
+                                           ->first();
+        $lessonSuivant->is_locked = false;
+        $lessonSuivant->update();                                  
 
         //  Ajouter la leçon à la liste des leçons complétées
         $completed = $progress->completed_lessons ?? [];

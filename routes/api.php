@@ -7,6 +7,7 @@ use App\Http\Controllers\CourseProgressController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\QuizController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -27,7 +28,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('logout', [AuthController::class, 'logout']);
 });
 
-// Cours Routes
+ /******************* Cours Routes ****************************** */
 Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
     Route::get('courses/{id}', [CourseController::class, 'show']);
     Route::put('courses/{id}', [CourseController::class, 'update']);
@@ -38,32 +39,48 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 Route::get('courses', [CourseController::class, 'index']);
 
-// Lessons routes
+
+ /******************* lessons Routes ****************************** */
 Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
     Route::post('courses/{course}/lessons', [LessonController::class, 'store']);
     Route::put('lessons/{lesson}', [LessonController::class, 'update']);
     Route::delete('/lessons/{lesson}', [LessonController::class, 'destroy']);
 });
-Route::get('courses/{course}/lessons', [LessonController::class, 'index']);
-Route::get('courses/{course}/lessons/{lesson}', [LessonController::class, 'show']);
-
-// Routes pour les ressources (authentification requise)
 Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('lesson/{lesson}/resources', [ResourceController::class, 'store']);
-    Route::put('cours/{cours}/lesson/{lesson}/resources/{resource}', [ResourceController::class, 'update']);
-    Route::delete('/resources/{resource}', [ResourceController::class, 'destroy']);
-    Route::post('/lesson/{lesson}/evaluations', [EvaluationController::class, 'store']);
+    Route::get('courses/{course}/lessons/{lesson}', [LessonController::class, 'show']);
+    Route::get('courses/{course}/lessons', [LessonController::class, 'index']);
 });
-// Routes publiques pour les ressources
-Route::get('lesson/{lesson}/resources', [ResourceController::class, 'index']);
-Route::get('lesson/{lesson}/resources/{resource}', [ResourceController::class, 'show']);
 
-// Routes pour les évaluations
+
+ /******************* Resources Routes ****************************** */
+Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
+    Route::post('lesson/{lesson}/resources', [ResourceController::class, 'store']);
+    Route::put('lesson/{lesson}/resources/{resource}', [ResourceController::class, 'update']);
+    Route::delete('/resources/{resource}', [ResourceController::class, 'destroy']);
+});
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::get('lesson/{lesson}/resources', [ResourceController::class, 'index']);
+    Route::get('lesson/{lesson}/resources/{resource}', [ResourceController::class, 'show']); 
+});
+
+
+ /******************* Evaluations Routes ****************************** */
+Route::post('/lesson/{lesson}/evaluations', [EvaluationController::class, 'store']);
 Route::get('/courses/{course}/evaluations', [EvaluationController::class, 'index']);
 Route::post('/evaluations/{evaluation}/submit', [EvaluationController::class, 'submit']);
 
-// Routes pour les progression des cours
+
+ /******************* Progresssion Routes ****************************** */
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/courses/{courseId}/progress', [CourseProgressController::class, 'getProgress']);
     Route::post('/courses/{courseId}/progress', [CourseProgressController::class, 'updateProgress']);
-    });
+});
+
+
+ /******************* Quiz Routes ****************************** */
+Route::middleware(['auth:sanctum','role:admin,formateur'])->group(function () {
+    Route::post('courses/{courseId}/quiz', [QuizController::class, 'store']);
+});
+Route::middleware(['auth:sanctum', 'role:admin,formateur,apprenant'])->group(function () {
+    Route::get('cours/{courseId}/quiz', [QuizController::class, 'index']);
+});

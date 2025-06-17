@@ -207,7 +207,416 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "sanctumAuth": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Modifier ou mettre a jour les inlfos du cours",
+                "operationId": "4d00e54a4b57b3259c40894ad2d0c76b",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Course"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Modifier avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Cours non trougvé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{course}/lessons": {
+            "get": {
+                "tags": [
+                    "Leçon"
+                ],
+                "summary": "Lister tous les lessons",
+                "operationId": "2c4e6971ea10678972bd235206d31c64",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des Lessosn",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Lesson"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Leçon"
+                ],
+                "summary": "Création de nouvelle leçon",
+                "operationId": "0a1fc3a4f8333d9bc03a9ba84b620eb4",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Lesson"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Leçon créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{course}/lessons/{lesson}": {
+            "get": {
+                "tags": [
+                    "Leçon"
+                ],
+                "summary": "Detail lesson",
+                "operationId": "8c11087adc5be274079d268998a95771",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/lessons/{lesson}": {
+            "put": {
+                "tags": [
+                    "Leçon"
+                ],
+                "summary": "Modifier ou mettre a jour les inlfos d'une Leçon",
+                "operationId": "73b130595c873899cec53486a9964352",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Lesson"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Modifier avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Lesson non trougvé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "Leçon"
+                ],
+                "summary": "Supprimer une Leçon",
+                "operationId": "9cebf75653bf2011b4b9d952a587217d",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "description": "ID de la Leçon à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Leçon supprimé avec succès"
+                    },
+                    "404": {
+                        "description": "Leçon non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/lesson/{lesson}/resources": {
+            "get": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Lister tous les ressources d'une Leçon",
+                "operationId": "7cfe90180008ecb29e2b5ad7a73ebd33",
+                "responses": {
+                    "200": {
+                        "description": "Liste des ressources",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Ressource"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Création de nouvelle ressource pour une Leçon",
+                "operationId": "935c16222d1a96398e7773099109c621",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "description": "ID de la Leçon",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Ressource"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Leçon créé avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ressource"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/lesson/{lesson}/resources/{resource}": {
+            "put": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Modifier ou mettre a jour les inlfos d'une Leçon",
+                "operationId": "e46ad623443c4ce60a25c9fd31001562",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "resource",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Ressource"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Modifier avec succes",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Ressource"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Ressource non trougvé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/resources/{resource}": {
+            "delete": {
+                "tags": [
+                    "Ressources"
+                ],
+                "summary": "Supprimer une ressource",
+                "operationId": "9324268fe414cd2963ba2509763c0d6d",
+                "parameters": [
+                    {
+                        "name": "resource",
+                        "in": "path",
+                        "description": "ID de la ressource à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Leçon supprimé avec succès"
+                    },
+                    "404": {
+                        "description": "Leçon non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
                     }
                 ]
             }
@@ -462,6 +871,39 @@
                 },
                 "type": "object"
             },
+            "Ressource": {
+                "required": [
+                    "id",
+                    "type"
+                ],
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 2
+                    },
+                    "title": {
+                        "type": "string",
+                        "example": "Livre Laravel"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "pdf"
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "path": {
+                        "type": "string",
+                        "example": "lessons/files/example.pdf"
+                    },
+                    "external_url": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "type": "object"
+            },
             "User": {
                 "required": [
                     "id",
@@ -528,6 +970,14 @@
         {
             "name": "Courses",
             "description": "Courses"
+        },
+        {
+            "name": "Leçon",
+            "description": "Leçon"
+        },
+        {
+            "name": "Ressources",
+            "description": "Ressources"
         }
     ]
 }

@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('resources', function (Blueprint $table) {
-            $table->foreignId('course_id')->nullable()->constrained()->nullOnDelete();
+        Schema::create('answers', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('question_id')->constrained()->onDelete('cascade');
+            $table->string('text');
+            $table->boolean('is_correct')->default(false);
+            $table->timestamps();
         });
     }
 
@@ -21,9 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('resources', function (Blueprint $table) {
-            $table->dropForeign(['course_id']);
-            $table->dropColumn('course_id');
-        });
+        Schema::dropIfExists('answers');
     }
 };

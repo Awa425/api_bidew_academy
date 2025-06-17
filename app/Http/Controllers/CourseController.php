@@ -37,7 +37,7 @@ class CourseController extends Controller
      *     path="/api/courses",
      *     summary="Créer un nouveau cours",
      *     tags={"Courses"},
-      *     security={{"sanctumAuth":{}}},
+     *     security={{"sanctumAuth":{}}},
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/Course")
@@ -94,7 +94,7 @@ class CourseController extends Controller
      *     path="/api/courses/{id}",
      *     summary="Get course details",
      *     tags={"Courses"},
-     *     security={{"bearerAuth":{}}},
+     *     security={{"sanctumAuth":{}}},
      *     @OA\Parameter(
      *         name="id",
      *         in="path",
@@ -119,7 +119,30 @@ class CourseController extends Controller
         
     }
 
-  
+    /**
+     * @OA\Put(
+     *     path="/api/courses/{id}",
+     *     summary="Modifier ou mettre a jour les inlfos du cours",
+     *     tags={"Courses"},
+     *     security={{"sanctumAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="#/components/schemas/Course")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Modifier avec succes",
+     *         @OA\JsonContent(ref="#/components/schemas/Course")
+     *     ),
+     *     @OA\Response(response=404, description="Cours non trougvé")
+     * )
+     */
     public function update(Request $request, $course)
     {  
         $validator = Validator::make($request->all(), [

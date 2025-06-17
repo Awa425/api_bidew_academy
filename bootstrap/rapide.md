@@ -6,4 +6,4 @@
 # open this url http://localhost:8000/api/documentation#/
 # Configurer la fonctionalité login with google avec CLIENT_ID Google
     
-# Exemple token for test : 44|bTUQOWFmyRN3xIsMJ7Ix7LZgkcOAdKh1A1egTGxya2ac0af6
+# Exemple token for test : 49|m3Fid0kOn91q0geKLGevnfgf4bpmcqZ15e26HCer766a7604
