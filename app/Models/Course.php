@@ -49,6 +49,11 @@ class Course extends Model
         return $this->hasMany(Resource::class);
     }
 
+        public function quizzes()
+    {
+        return $this->hasMany(Quiz::class);
+    }
+
     /**
      * Get the evaluations for the course.
      */

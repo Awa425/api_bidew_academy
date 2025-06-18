@@ -55,7 +55,7 @@ class LessonController extends Controller
      *         required=true,
      *         @OA\Schema(type="integer")
      *     ),
-         *     @OA\Parameter(
+     *     @OA\Parameter(
      *         name="lesson",
      *         in="path",
      *         required=true,
@@ -109,7 +109,7 @@ class LessonController extends Controller
      * )
      */
     public function store(Request $request, Course $course)
-    {
+    { 
         $userId = auth()->id();
         if ($userId !== $course->user_id) {
             return response()->json([

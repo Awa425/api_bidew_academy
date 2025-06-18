@@ -69,6 +69,13 @@ Route::post('/lesson/{lesson}/evaluations', [EvaluationController::class, 'store
 Route::get('/courses/{course}/evaluations', [EvaluationController::class, 'index']);
 Route::post('/evaluations/{evaluation}/submit', [EvaluationController::class, 'submit']);
 
+/******************* Quiz Routes ****************************** */
+Route::middleware(['auth:sanctum','role:admin,formateur'])->group(function () {
+    Route::post('courses/{course}/quizzes', [QuizController::class, 'store']);
+});
+Route::middleware(['auth:sanctum', 'role:admin,formateur,apprenant'])->group(function () {
+    Route::get('courses/{course}/quizzes', [QuizController::class, 'index']);
+});
 
  /******************* Progresssion Routes ****************************** */
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -77,10 +84,3 @@ Route::middleware(['auth:sanctum'])->group(function () {
 });
 
 
- /******************* Quiz Routes ****************************** */
-Route::middleware(['auth:sanctum','role:admin,formateur'])->group(function () {
-    Route::post('courses/{courseId}/quiz', [QuizController::class, 'store']);
-});
-Route::middleware(['auth:sanctum', 'role:admin,formateur,apprenant'])->group(function () {
-    Route::get('cours/{courseId}/quiz', [QuizController::class, 'index']);
-});
