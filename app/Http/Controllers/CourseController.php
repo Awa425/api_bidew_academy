@@ -22,7 +22,7 @@ class CourseController extends Controller
      */
     public function index()
     { 
-        $courses = Course::with(['lessons.contents', 'resources', 'evaluations'])
+        $courses = Course::with(['lessons.contents', 'resources', 'quizzes.questions' ,'evaluations'])
             ->when(request('published_only'), function ($query) {
                 $query->where('is_published', true);
             })
@@ -115,7 +115,7 @@ class CourseController extends Controller
         if (is_null($course)) {
             return $this->sendError('Course not found.');
         }
-        return response()->json($course->load('user','lessons.contents', 'resources', 'evaluations'));
+        return response()->json($course->load('user','lessons.contents',  'quizzes.questions' ,'resources', 'evaluations'));
         
     }
 
