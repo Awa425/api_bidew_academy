@@ -33,19 +33,19 @@ namespace App\Docs;
  *             example="1"
  *         ),
  *         description="Lesson terminés"
- *     ),
- *     @OA\Property(
+ *      ),
+ *      @OA\Property(
  *         property="progress_percent",
  *         type="integer",
  *         description="Pourcentage",
  *         example="1"
- *     ),
- *     @OA\Property(
+ *      ),
+ *      @OA\Property(
  *         property="started_at",
  *         type="date",
  *         description="Date de debut",
  *        example="2025-01-15"
- *     ),
+ *      ),
  * )
  */
 class ProgressionSchema {}

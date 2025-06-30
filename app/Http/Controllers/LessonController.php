@@ -117,31 +117,35 @@ class LessonController extends Controller
             ], 403);
         }
 
+
         // Validation
         $validator = Validator::make($request->all(), [
             'title' => 'required|string',
-            'order' => 'nullable|integer',
             'duration_minutes' => 'nullable|integer|min:1',
             'is_published' => 'boolean',
-            'is_locked' => 'boolean',
-            'content.type' => 'required|in:text,video,pdf,link',
+            'content.type' => 'required|in:text,video,pdf,link,jpg,jpeg',
             'content.data' => 'nullable|string',
             'content.external_url' => 'nullable|url',
-            'content.file' => 'nullable|file|mimes:pdf,mp4,avi,mov|max:20480' // max 20MB
+            'content.file' => 'nullable|file|mimes:pdf,mp4,avi,mov,jpg,jpeg|max:20480' // max 20MB
         ]);
 
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        $nextOrder = ($course->lessons()->max('order') ?? 0) + 1;
+
+        // Débloquer uniquement la première leçon automatiquement
+        $isLocked = $nextOrder > 1 ? true : false;
+
         // Création de la leçon
         $lesson = $course->lessons()->create([
             'title' => $request->title,
-            'order' => $request->order,
+            'order' => $nextOrder,
             'duration_minutes' => $request->duration_minutes,
             'is_published' => $request->is_published ?? false,
             'user_id' => $userId,
-            'is_locked' => $request->input('is_locked', false),
+            'is_locked' => $isLocked,
         ]);
 
         // Traitement du fichier s'il est fourni
@@ -207,14 +211,13 @@ class LessonController extends Controller
 
     $validator = Validator::make($request->all(), [
         'title' => 'sometimes|required|string',
-        'order' => 'nullable|integer',
         'duration_minutes' => 'nullable|integer|min:1',
         'is_published' => 'boolean',
         'is_locked' => 'boolean',
-        'content.type' => 'sometimes|required|string|in:text,video,pdf,link',
+        'content.type' => 'sometimes|required|string|in:text,video,pdf,link,jpg,jpeg',
         'content.data' => 'nullable|string',
         'content.external_url' => 'nullable|url',
-        'content.file' => 'nullable|file|mimes:pdf,mp4,avi,mov|max:20480'
+        'content.file' => 'nullable|file|mimes:pdf,mp4,avi,mov|max:20480,jpg,jpeg'
     ]);
 
     if ($validator->fails()) {
@@ -224,7 +227,6 @@ class LessonController extends Controller
     // Mise à jour des données de la leçon
     $lesson->update([
         'title' => $request->input('title', $lesson->title),
-        'order' => $request->input('order', $lesson->order),
         'duration_minutes' => $request->input('duration_minutes', $lesson->duration_minutes),
         'is_published' => $request->input('is_published', $lesson->is_published),
         'is_locked' => $request->input('is_locked', $lesson->is_locked),

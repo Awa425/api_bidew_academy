@@ -259,6 +259,102 @@
                 ]
             }
         },
+        "/api/courses/{courseId}/progress": {
+            "get": {
+                "tags": [
+                    "Progression"
+                ],
+                "summary": "Recuperer les progressions",
+                "operationId": "29faa9dd8965609d254f8131e085a598",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Liste des progressions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Progression"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Progression"
+                ],
+                "summary": "Marquer une Leçon terminée",
+                "operationId": "75d02a10580bd97b478c265b3b141380",
+                "parameters": [
+                    {
+                        "name": "courseId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "lesson_id"
+                                ],
+                                "properties": {
+                                    "lesson_id": {
+                                        "description": "ID du Leçon terminée",
+                                        "type": "integer",
+                                        "example": 1
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Leçon terminée",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Progression"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
         "/api/courses/{course}/lessons": {
             "get": {
                 "tags": [
@@ -1063,26 +1159,13 @@
                         "format": "email",
                         "example": "diopawa192@gmail.com"
                     },
-                    "email_verified_at": {
+                    "password": {
                         "type": "string",
-                        "format": "date-time",
-                        "nullable": true
+                        "example": "passer"
                     },
                     "role": {
                         "type": "string",
                         "example": "admin"
-                    },
-                    "google_id": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
                     }
                 },
                 "type": "object"
@@ -1109,6 +1192,10 @@
         {
             "name": "Courses",
             "description": "Courses"
+        },
+        {
+            "name": "Progression",
+            "description": "Progression"
         },
         {
             "name": "Leçon",

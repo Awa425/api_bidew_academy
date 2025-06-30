@@ -9,6 +9,39 @@ use Illuminate\Http\Request;
 
 class CourseProgressController extends Controller
 {
+    /**
+     * @OA\Post(
+     *      path="/api/courses/{courseId}/progress",
+     *      summary="Marquer une Leçon terminée",
+     *      tags={"Progression"},
+     *      security={{"sanctumAuth":{}}},
+     *     @OA\Parameter(
+     *         name="courseId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *      @OA\RequestBody(
+     *         required=true,
+     *          @OA\JsonContent(
+     *              type="object",
+     *              required={"lesson_id"},
+     *              @OA\Property(
+     *                  property="lesson_id",
+     *                  type="integer",
+     *                  example=1,
+     *                  description="ID du Leçon terminée"
+     *              )
+     *          )
+     *      ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Leçon terminée",
+     *         @OA\JsonContent(ref="#/components/schemas/Progression")
+     *     ),
+     *     @OA\Response(response=400, description="Données invalides")
+     * )
+     */
     public function updateProgress(Request $request, $courseId)
     {
         //  Récupérer current user et l'ID de la leçon
@@ -30,8 +63,10 @@ class CourseProgressController extends Controller
         $lessonSuivant = $course->lessons()->where('order', '>' , $lesson->order)
                                            ->orderBy('order', 'asc')
                                            ->first();
-        $lessonSuivant->is_locked = false;
-        $lessonSuivant->update();                                  
+        if ($lessonSuivant) {
+            $lessonSuivant->is_locked = false;
+            $lessonSuivant->update();                                  
+        }                                   
 
         //  Ajouter la leçon à la liste des leçons complétées
         $completed = $progress->completed_lessons ?? [];
@@ -54,6 +89,25 @@ class CourseProgressController extends Controller
         return response()->json(['progress' => $progress], 200);
     }
 
+         /**
+     * @OA\Get(
+     *     path="/api/courses/{courseId}/progress",
+     *     summary="Recuperer les progressions",
+     *     tags={"Progression"},
+     *     security={{"sanctumAuth":{}}},
+     *     @OA\Parameter(
+     *         name="courseId",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des progressions",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Progression"))
+     *     )
+     * )
+     */
     public function getProgress($courseId)
     {
         $user = auth()->id();

@@ -75,6 +75,7 @@ Route::middleware(['auth:sanctum','role:admin,formateur'])->group(function () {
 });
 Route::middleware(['auth:sanctum', 'role:admin,formateur,apprenant'])->group(function () {
     Route::get('courses/{course}/quizzes', [QuizController::class, 'index']);
+    Route::post('courses/{course}/quizzes/submit', [QuizController::class, 'submit']);
 });
 
  /******************* Progresssion Routes ****************************** */
