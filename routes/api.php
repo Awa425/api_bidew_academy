@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\LessonUserProgressController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CourseController;
 use App\Http\Controllers\CourseProgressController;
@@ -49,6 +50,7 @@ Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('courses/{course}/lessons/{lesson}', [LessonController::class, 'show']);
     Route::get('courses/{course}/lessons', [LessonController::class, 'index']);
+    Route::patch('lessons/{lesson}/progress', [LessonUserProgressController::class, 'updateProgress']);
 });
 
 

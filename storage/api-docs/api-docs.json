@@ -399,6 +399,16 @@
                 ],
                 "summary": "Création de nouvelle leçon",
                 "operationId": "0a1fc3a4f8333d9bc03a9ba84b620eb4",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -555,6 +565,97 @@
                 ]
             }
         },
+        "/api/lessons/{lesson}/progress": {
+            "patch": {
+                "tags": [
+                    "Leçon"
+                ],
+                "summary": "Marquer une leçon comme terminée et mettre à jour la progression du cours",
+                "description": "Cette méthode permet à un utilisateur authentifié de marquer une leçon comme complétée, débloquer la prochaine leçon et mettre à jour la progression globale du cours.",
+                "operationId": "updateLessonProgress",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "description": "ID de la leçon à marquer comme terminée",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 7
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Progression mise à jour avec succès.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Progression mise à jour avec succès."
+                                        },
+                                        "completed_lesson_id": {
+                                            "type": "integer",
+                                            "example": 7
+                                        },
+                                        "next_unlocked_lesson_id": {
+                                            "type": "integer",
+                                            "example": 8,
+                                            "nullable": true
+                                        },
+                                        "course_progress_percent": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 42.86
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Utilisateur non authentifié",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Non authentifié."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Leçon introuvable",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Leçon non trouvée."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
         "/api/courses/{course}/quizzes": {
             "get": {
                 "tags": [
@@ -632,6 +733,139 @@
                     },
                     "400": {
                         "description": "Données invalides"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{course}/quizzes/submit": {
+            "post": {
+                "tags": [
+                    "Quiz"
+                ],
+                "summary": "Soumettre les réponses d’un quiz et enregistrer le résultat",
+                "operationId": "e099fbb72d47e1a5fc0dc937a5e54f3c",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "quiz_id",
+                                    "answers"
+                                ],
+                                "properties": {
+                                    "quiz_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "answers": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "question_id",
+                                                "answer_id"
+                                            ],
+                                            "properties": {
+                                                "question_id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "answer_id": {
+                                                    "type": "integer",
+                                                    "example": 3
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Quiz soumis avec succès",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Quiz soumis avec succès"
+                                        },
+                                        "score": {
+                                            "type": "string",
+                                            "example": "8/10"
+                                        },
+                                        "percentage": {
+                                            "type": "number",
+                                            "format": "float",
+                                            "example": 80
+                                        },
+                                        "results": {
+                                            "type": "array",
+                                            "items": {
+                                                "properties": {
+                                                    "question_id": {
+                                                        "type": "integer",
+                                                        "example": 10
+                                                    },
+                                                    "correct_answer_id": {
+                                                        "type": "integer",
+                                                        "example": 45
+                                                    },
+                                                    "selected_answer_id": {
+                                                        "type": "integer",
+                                                        "example": 45
+                                                    },
+                                                    "is_correct": {
+                                                        "type": "boolean",
+                                                        "example": true
+                                                    }
+                                                },
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Quiz non trouvé"
                     }
                 },
                 "security": [

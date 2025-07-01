@@ -96,6 +96,12 @@ class LessonController extends Controller
      *      summary="Création de nouvelle leçon",
      *      tags={"Leçon"},
      *      security={{"sanctumAuth":{}}},
+     *      @OA\Parameter(
+     *         name="course",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
      *      @OA\RequestBody(
      *         required=true,
      *         @OA\JsonContent(ref="#/components/schemas/Lesson")

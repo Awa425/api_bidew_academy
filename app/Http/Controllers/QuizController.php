@@ -132,8 +132,72 @@ class QuizController extends Controller
                 return response()->json([
                     'Quiz'=>$quiz->load('questions.answers')], 201);
            
-        }
+    }
 
+    /**
+     * @OA\Post(
+     *     path="/api/courses/{course}/quizzes/submit",
+     *     tags={"Quiz"},
+     *     summary="Soumettre les réponses d’un quiz et enregistrer le résultat",
+     *     security={{"sanctumAuth":{}}},
+     *      @OA\Parameter(
+     *         name="course",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"quiz_id", "answers"},
+     *             @OA\Property(property="quiz_id", type="integer", example=1),
+     *             @OA\Property(
+     *                 property="answers",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     type="object",
+     *                     required={"question_id", "answer_id"},
+     *                     @OA\Property(property="question_id", type="integer", example=1),
+     *                     @OA\Property(property="answer_id", type="integer", example=3)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     * 
+     *     @OA\Response(
+     *         response=200,
+     *         description="Quiz soumis avec succès",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="message", type="string", example="Quiz soumis avec succès"),
+     *             @OA\Property(property="score", type="string", example="8/10"),
+     *             @OA\Property(property="percentage", type="number", format="float", example=80.0),
+     *             @OA\Property(
+     *                 property="results",
+     *                 type="array",
+     *                 @OA\Items(
+     *                     @OA\Property(property="question_id", type="integer", example=10),
+     *                     @OA\Property(property="correct_answer_id", type="integer", example=45),
+     *                     @OA\Property(property="selected_answer_id", type="integer", example=45),
+     *                     @OA\Property(property="is_correct", type="boolean", example=true)
+     *                 )
+     *             )
+     *         )
+     *     ),
+     * 
+     *     @OA\Response(
+     *         response=422,
+     *         description="Erreur de validation",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="errors", type="object")
+     *         )
+     *     ),
+     * 
+     *     @OA\Response(
+     *         response=404,
+     *         description="Quiz non trouvé"
+     *     )
+     * )
+     */
     public function submit(Request $request)
     {
         $user = auth()->user();

@@ -45,10 +45,15 @@ class User extends Authenticatable
         return $this->role === 'formateur';
     }
 
+    public function lessonProgresses()
+    {
+        return $this->hasMany(LessonUserProgress::class);
+    }
+
     public function userQuizzes()
-{
-    return $this->hasMany(UserQuiz::class);
-}
+    {
+        return $this->hasMany(UserQuiz::class);
+    }
 
     /**
      * Get the attributes that should be cast.
