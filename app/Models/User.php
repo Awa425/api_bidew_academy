@@ -45,9 +45,14 @@ class User extends Authenticatable
         return $this->role === 'formateur';
     }
 
-    public function lessonProgresses()
+    public function lessonProgress()
     {
         return $this->hasMany(LessonUserProgress::class);
+    }
+
+    public function courseProgress()
+    {
+        return $this->hasMany(CourseUserProgress::class);
     }
 
     public function userQuizzes()

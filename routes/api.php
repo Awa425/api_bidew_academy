@@ -27,12 +27,13 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('users', UserController::class);
     Route::get('profile', function (Request $request) {return $request->user(); });
     Route::post('logout', [AuthController::class, 'logout']);
+    Route::get('users/{id}/details',[UserController::class,'showDetailDetails']);
 });
 
  /******************* Cours Routes ****************************** */
 Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
     Route::get('courses/{id}', [CourseController::class, 'show']);
-    Route::put('courses/{id}', [CourseController::class, 'update']);
+    Route::put('courses/{course}', [CourseController::class, 'update']);
     Route::post('courses', [CourseController::class, 'store']);
 });
 Route::middleware(['auth:sanctum'])->group(function () {

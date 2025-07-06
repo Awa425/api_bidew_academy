@@ -115,7 +115,7 @@ class LessonController extends Controller
      * )
      */
     public function store(Request $request, Course $course)
-    { 
+    {
         $userId = auth()->id();
         if ($userId !== $course->user_id) {
             return response()->json([

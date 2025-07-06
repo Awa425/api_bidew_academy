@@ -74,7 +74,7 @@ class CourseController extends Controller
         }
 
         $data = $request->except('image_path');
-
+        // dd($request);
         if ($request->hasFile('image_path')) {
             $image = $request->file('image_path');
             $imageName = time() . '_' . $image->getClientOriginalName();
@@ -121,12 +121,12 @@ class CourseController extends Controller
 
     /**
      * @OA\Put(
-     *     path="/api/courses/{id}",
+     *     path="/api/courses/{course}",
      *     summary="Modifier ou mettre a jour les inlfos du cours",
      *     tags={"Courses"},
      *     security={{"sanctumAuth":{}}},
      *     @OA\Parameter(
-     *         name="id",
+     *         name="course",
      *         in="path",
      *         required=true,
      *         @OA\Schema(type="integer")
@@ -143,28 +143,47 @@ class CourseController extends Controller
      *     @OA\Response(response=404, description="Cours non trougvé")
      * )
      */
-    public function update(Request $request, $course)
-    {  
+    public function update(Request $request, Course $course)
+    {
+        // Vérification que l'utilisateur authentifié est le créateur du cours
+        if (auth()->id() !== $course->user_id) {
+            return response()->json(['error' => 'Vous n\'avez pas la permission de modifier ce cours.'], 403);
+        }
+
         $validator = Validator::make($request->all(), [
-            'title' => 'sometimes|required|string',
-            'description' => 'sometimes|required|string',
-            'category' => 'sometimes|required|string',
-            'level' => 'sometimes|required|string',
+            'title' => 'nullable|string',
+            'description' => 'nullable|string',
+            'prerequis' => 'nullable|string',
+            'objectif' => 'nullable|string',
+            'progression' => 'nullable|integer|min:0|max:100',
+            'category' => 'nullable|string',
+            'level' => 'nullable|string',
             'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'duration_minutes' => 'sometimes|required|integer|min:1',
-            'is_published' => 'sometimes|boolean'
+            'duration_minutes' => 'nullable|integer|min:1',
+            'is_published' => 'boolean'
         ]);
 
-        
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
-        $course = Course::find($course);
 
-        $course->update($request->all());
+         $data = $request->except('image_path');
+        dd($request);
+        if ($request->hasFile('image_path')) {
+            $image = $request->file('image_path');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('uploads/courses'), $imageName);
+            $data['image_path'] = 'uploads/courses/' . $imageName;
+        }
 
-        return response()->json($course->load('user','lessons.contents', 'resources', 'evaluations'));
+        $course->update($data);
+
+        return response()->json([
+            'message' => 'Cours mis à jour avec succès.',
+            'course' => $course
+        ]);
     }
+
 
     public function destroy(Course $course)
     {

@@ -53,7 +53,7 @@ class LessonUserProgressController extends Controller
      *     )
      * )
      */
-    public function updateProgress(Request $request, $lessonId)
+    public function updateProgressOld(Request $request, $lessonId)
     {
         $userId = auth()->id();
 
@@ -110,6 +110,72 @@ class LessonUserProgressController extends Controller
             'course_progress_percent' => $progressPercent,
         ]);
     }
+
+    public function updateProgress(Request $request, $lessonId)
+{
+    $userId = auth()->id();
+
+    $lesson = Lesson::with('course')->findOrFail($lessonId);
+    $course = $lesson->course;
+
+    // 1. Marquer la leçon comme complétée
+    LessonUserProgress::updateOrCreate(
+        ['lesson_id' => $lesson->id, 'user_id' => $userId],
+        [
+            'is_locked' => false,
+            'is_completed' => true,
+            'completed_at' => now(),
+        ]
+    );
+
+    // 2. Récupération ou création de la progression du cours
+    $progress = CourseUserProgress::firstOrNew([
+        'user_id' => $userId,
+        'course_id' => $course->id
+    ]);
+
+    // 3. Mettre à jour la liste des leçons complétées
+    $completedLessons = LessonUserProgress::where('user_id', $userId)
+        ->whereHas('lesson', function ($q) use ($course) {
+            $q->where('course_id', $course->id);
+        })
+        ->where('is_completed', true)
+        ->pluck('lesson_id')
+        ->toArray();
+        // dd($completedLessons);
+    // 4. Calcul du pourcentage de progression
+    $totalLessons = Lesson::where('course_id', $course->id)->count();
+    $progressPercent = $totalLessons > 0
+        ? round((count($completedLessons) / $totalLessons) * 100, 2)
+        : 0;
+
+    // 5. Débloquer la prochaine leçon
+    $nextLesson = Lesson::where('course_id', $course->id)
+        ->where('order', '>', $lesson->order)
+        ->orderBy('order')
+        ->first();
+
+    if ($nextLesson) {
+        LessonUserProgress::updateOrCreate(
+            ['lesson_id' => $nextLesson->id, 'user_id' => $userId],
+            ['is_locked' => false]
+        );
+    }
+
+    // 6. Mise à jour finale de la progression
+    $progress->progress_percent = $progressPercent;
+    $progress->completed_lessons = $completedLessons;
+    $progress->current_lesson_id = $nextLesson?->id;
+    $progress->save();
+
+    return response()->json([
+        'message' => 'Progression mise à jour avec succès.',
+        'completed_lessons' => $completedLessons,
+        'next_unlocked_lesson_id' => $nextLesson?->id,
+        'course_progress_percent' => $progressPercent,
+    ]);
+}
+
 
 
 }
