@@ -38,6 +38,7 @@ Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
 });
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('courses/{id}', [CourseController::class, 'show']);
+    Route::post('courses/{id}/start', [CourseController::class, 'startCourse']);
 });
 Route::get('courses', [CourseController::class, 'index']);
 

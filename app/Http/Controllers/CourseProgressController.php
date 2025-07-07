@@ -117,4 +117,6 @@ class CourseProgressController extends Controller
 
         return response()->json($progress);
     }
+
+    
 }

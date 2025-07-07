@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Course;
+use App\Models\LessonUserProgress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -168,7 +169,7 @@ class CourseController extends Controller
         }
 
          $data = $request->except('image_path');
-        dd($request);
+      
         if ($request->hasFile('image_path')) {
             $image = $request->file('image_path');
             $imageName = time() . '_' . $image->getClientOriginalName();
@@ -182,6 +183,46 @@ class CourseController extends Controller
             'message' => 'Cours mis à jour avec succès.',
             'course' => $course
         ]);
+    }
+
+        /**
+     * @OA\Post(
+     *     path="/api/courses/{id}/start",
+     *     summary="Démarrer cours. Première leçon débloquée.",
+     *     tags={"Courses"},
+     *     security={{"sanctumAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Cours démarré. Première leçon débloquée.",
+     *         @OA\JsonContent(ref="#/components/schemas/Course")
+     *     ),
+     *     @OA\Response(response=400, description="Données invalides")
+     * )
+     */
+    public function startCourse($courseId)
+    {
+        $userId = auth()->id();
+        $course = Course::findOrFail($courseId);
+
+        $firstLesson = $course->lessons()->orderBy('order')->first();
+
+        if ($firstLesson) {
+            LessonUserProgress::firstOrCreate([
+                'user_id' => $userId,
+                'lesson_id' => $firstLesson->id,
+            ], [
+                'is_locked' => false,
+                'is_completed' => false,
+            ]);
+        }
+
+        return response()->json(['message' => 'Cours démarré. Première leçon débloquée.']);
     }
 
 

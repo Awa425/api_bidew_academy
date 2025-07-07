@@ -210,16 +210,18 @@
                         "sanctumAuth": []
                     }
                 ]
-            },
+            }
+        },
+        "/api/courses/{course}": {
             "put": {
                 "tags": [
                     "Courses"
                 ],
                 "summary": "Modifier ou mettre a jour les inlfos du cours",
-                "operationId": "4d00e54a4b57b3259c40894ad2d0c76b",
+                "operationId": "5f1701987d5321072267c5f888fd05af",
                 "parameters": [
                     {
-                        "name": "id",
+                        "name": "course",
                         "in": "path",
                         "required": true,
                         "schema": {
@@ -250,6 +252,45 @@
                     },
                     "404": {
                         "description": "Cours non trougvé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/courses/{id}/start": {
+            "post": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Démarrer cours. Première leçon débloquée.",
+                "operationId": "a5923a7bbf1c26639f13739c687fd8fb",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Cours démarré. Première leçon débloquée.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Données invalides"
                     }
                 },
                 "security": [

@@ -132,7 +132,7 @@ class LessonController extends Controller
             'content.type' => 'required|in:text,video,pdf,link,jpg,jpeg',
             'content.data' => 'nullable|string',
             'content.external_url' => 'nullable|url',
-            'content.file' => 'nullable|file|mimes:pdf,mp4,avi,mov,jpg,jpeg|max:20480' // max 20MB
+            'content.file' => 'nullable|file|mimes:pdf,mp4,avi,mov,jpg,jpeg|max:20480' 
         ]);
 
         if ($validator->fails()) {
