@@ -788,8 +788,9 @@
                 "tags": [
                     "Quiz"
                 ],
-                "summary": "Soumettre les réponses d’un quiz et enregistrer le résultat",
-                "operationId": "e099fbb72d47e1a5fc0dc937a5e54f3c",
+                "summary": "Soumettre un quiz avec les réponses de l'utilisateur",
+                "description": "Soumet les réponses de l'utilisateur à un quiz, enregistre les résultats, et calcule le score.",
+                "operationId": "submitQuiz",
                 "parameters": [
                     {
                         "name": "course",
@@ -817,18 +818,17 @@
                                     "answers": {
                                         "type": "array",
                                         "items": {
-                                            "required": [
-                                                "question_id",
-                                                "answer_id"
-                                            ],
                                             "properties": {
                                                 "question_id": {
                                                     "type": "integer",
-                                                    "example": 1
+                                                    "example": 10
                                                 },
-                                                "answer_id": {
-                                                    "type": "integer",
-                                                    "example": 3
+                                                "answer_ids": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "integer",
+                                                        "example": 42
+                                                    }
                                                 }
                                             },
                                             "type": "object"
@@ -853,12 +853,12 @@
                                         },
                                         "score": {
                                             "type": "string",
-                                            "example": "8/10"
+                                            "example": "3/5"
                                         },
                                         "percentage": {
                                             "type": "number",
                                             "format": "float",
-                                            "example": 80
+                                            "example": 60
                                         },
                                         "results": {
                                             "type": "array",
@@ -868,13 +868,17 @@
                                                         "type": "integer",
                                                         "example": 10
                                                     },
-                                                    "correct_answer_id": {
-                                                        "type": "integer",
-                                                        "example": 45
+                                                    "correct_answer_ids": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
                                                     },
-                                                    "selected_answer_id": {
-                                                        "type": "integer",
-                                                        "example": 45
+                                                    "selected_answer_ids": {
+                                                        "type": "array",
+                                                        "items": {
+                                                            "type": "integer"
+                                                        }
                                                     },
                                                     "is_correct": {
                                                         "type": "boolean",
@@ -890,20 +894,11 @@
                             }
                         }
                     },
+                    "403": {
+                        "description": "Déjà effectué"
+                    },
                     "422": {
-                        "description": "Erreur de validation",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "properties": {
-                                        "errors": {
-                                            "type": "object"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
-                            }
-                        }
+                        "description": "Validation error"
                     },
                     "404": {
                         "description": "Quiz non trouvé"

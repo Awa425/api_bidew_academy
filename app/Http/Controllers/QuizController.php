@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Course;
 use App\Models\CourseUserProgress;
 use App\Models\Lesson;
+use App\Models\LessonUserProgress;
 use App\Models\Quiz;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -137,10 +138,12 @@ class QuizController extends Controller
     /**
      * @OA\Post(
      *     path="/api/courses/{course}/quizzes/submit",
+     *     summary="Soumettre un quiz avec les réponses de l'utilisateur",
+     *     description="Soumet les réponses de l'utilisateur à un quiz, enregistre les résultats, et calcule le score.",
+     *     operationId="submitQuiz",
      *     tags={"Quiz"},
-     *     summary="Soumettre les réponses d’un quiz et enregistrer le résultat",
      *     security={{"sanctumAuth":{}}},
-     *      @OA\Parameter(
+         *     @OA\Parameter(
      *         name="course",
      *         in="path",
      *         required=true,
@@ -155,105 +158,142 @@ class QuizController extends Controller
      *                 property="answers",
      *                 type="array",
      *                 @OA\Items(
-     *                     type="object",
-     *                     required={"question_id", "answer_id"},
-     *                     @OA\Property(property="question_id", type="integer", example=1),
-     *                     @OA\Property(property="answer_id", type="integer", example=3)
+     *                     @OA\Property(property="question_id", type="integer", example=10),
+     *                     @OA\Property(
+     *                         property="answer_ids",
+     *                         type="array",
+     *                         @OA\Items(type="integer", example=42)
+     *                     )
      *                 )
      *             )
      *         )
      *     ),
-     * 
      *     @OA\Response(
      *         response=200,
      *         description="Quiz soumis avec succès",
      *         @OA\JsonContent(
      *             @OA\Property(property="message", type="string", example="Quiz soumis avec succès"),
-     *             @OA\Property(property="score", type="string", example="8/10"),
-     *             @OA\Property(property="percentage", type="number", format="float", example=80.0),
+     *             @OA\Property(property="score", type="string", example="3/5"),
+     *             @OA\Property(property="percentage", type="number", format="float", example=60.00),
      *             @OA\Property(
      *                 property="results",
      *                 type="array",
      *                 @OA\Items(
      *                     @OA\Property(property="question_id", type="integer", example=10),
-     *                     @OA\Property(property="correct_answer_id", type="integer", example=45),
-     *                     @OA\Property(property="selected_answer_id", type="integer", example=45),
+     *                     @OA\Property(property="correct_answer_ids", type="array", @OA\Items(type="integer")),
+     *                     @OA\Property(property="selected_answer_ids", type="array", @OA\Items(type="integer")),
      *                     @OA\Property(property="is_correct", type="boolean", example=true)
      *                 )
      *             )
      *         )
      *     ),
-     * 
+     *     @OA\Response(
+     *         response=403,
+     *         description="Déjà effectué"
+     *     ),
      *     @OA\Response(
      *         response=422,
-     *         description="Erreur de validation",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="errors", type="object")
-     *         )
+     *         description="Validation error"
      *     ),
-     * 
      *     @OA\Response(
      *         response=404,
      *         description="Quiz non trouvé"
      *     )
      * )
      */
-    public function submit(Request $request)
-    {
-        $user = auth()->user();
+public function submit(Request $request)
+{
+    $user = auth()->user();
 
-        $data = $request->validate([
-            'quiz_id' => 'required|exists:quizzes,id',
-            'answers' => 'required|array',
-            'answers.*.question_id' => 'required|exists:questions,id',
-            'answers.*.answer_id' => 'required|exists:answers,id',
-        ]);
+    $data = $request->validate([
+        'quiz_id' => 'required|exists:quizzes,id',
+        'answers' => 'required|array',
+        'answers.*.question_id' => 'required|exists:questions,id',
+        'answers.*.answer_ids' => 'required|array',
+        'answers.*.answer_ids.*' => 'integer|exists:answers,id'
+    ]);
 
-        $quiz = Quiz::with('questions.answers')->findOrFail($data['quiz_id']);
-        // dd($quiz->toArray());
-        $correctCount = 0;
-        $total = count($quiz->questions);
-        $results = [];
+    $quiz = Quiz::with('questions.answers', 'course')->findOrFail($data['quiz_id']);
 
-        // 1. Créer un enregistrement dans user_quizzes
-        $userQuiz = $user->userQuizzes()->create([
-            'quiz_id' => $quiz->id,
-            'score' => 0, // provisoire
-        ]);
-        foreach ($data['answers'] as $response) {
-            $question = $quiz->questions->firstWhere('id', $response['question_id']);
-            $selectedAnswer = $question->answers->firstWhere('id', $response['answer_id']);
+    // 🔐 Empêcher de refaire le quiz
+    $alreadyAttempted = $user->userQuizzes()->where('quiz_id', $quiz->id)->exists();
+    if ($alreadyAttempted) {
+        return response()->json([
+            'message' => 'Vous avez déjà soumis ce quiz.'
+        ], 403);
+    }
 
-            $isCorrect = $selectedAnswer && $selectedAnswer->is_correct;
-            if ($isCorrect) $correctCount++;
+    // 📌 Création de l'entrée UserQuiz
+    $userQuiz = $user->userQuizzes()->create([
+        'quiz_id' => $quiz->id,
+        'score' => 0
+    ]);
 
-            // 2. Enregistrer la réponse dans user_answers
+    $correctCount = 0;
+    $results = [];
+
+    foreach ($data['answers'] as $response) {
+        $question = $quiz->questions->firstWhere('id', $response['question_id']);
+        if (!$question) continue;
+
+        $correctAnswerIds = $question->answers->where('is_correct', true)->pluck('id')->sort()->values();
+        $selectedAnswerIds = collect($response['answer_ids'])->sort()->values();
+
+        $isCorrect = $selectedAnswerIds->all() === $correctAnswerIds->all();
+        if ($isCorrect) $correctCount++;
+
+        // ⏺️ Sauvegarde dans user_answers
+        foreach ($selectedAnswerIds as $answerId) {
             $userQuiz->answers()->create([
                 'question_id' => $question->id,
-                'answer_id' => $selectedAnswer?->id,
-                'is_correct' => $isCorrect,
-            ]);
-
-            $results[] = [
-                'question_id' => $question->id,
-                'correct_answer_id' => $question->answers->firstWhere('is_correct', true)?->id,
-                'selected_answer_id' => $selectedAnswer?->id,
+                'answer_id' => $answerId,
                 'is_correct' => $isCorrect
-            ];
+            ]);
         }
 
-        $score = round(($correctCount / $total) * 100, 2);
-
-        // 3. Mettre à jour le score dans user_quizzes
-        $userQuiz->update(['score' => $score]);
-
-        return response()->json([
-            'message' => 'Quiz soumis avec succès',
-            'score' => $correctCount . '/' . $total,
-            'percentage' => $score,
-            'results' => $results
-        ]);
+        $results[] = [
+            'question_id' => $question->id,
+            'selected_answer_ids' => $selectedAnswerIds,
+            'correct_answer_ids' => $correctAnswerIds,
+            'is_correct' => $isCorrect
+        ];
     }
+
+    $total = count($quiz->questions);
+    $score = $total > 0 ? round(($correctCount / $total) * 100, 2) : 0;
+
+    // 📝 Mise à jour du score
+    $userQuiz->update(['score' => $score]);
+
+    // 📈 Mise à jour de course_user_progress
+    $progress = CourseUserProgress::firstOrNew([
+        'user_id' => $user->id,
+        'course_id' => $quiz->course_id
+    ]);
+
+    // S'assurer que les leçons sont déjà prises en compte
+    $totalLessons = $quiz->course->lessons()->count();
+    $completedLessons = LessonUserProgress::where('user_id', $user->id)
+        ->whereHas('lesson', fn($q) => $q->where('course_id', $quiz->course_id))
+        ->where('is_completed', true)
+        ->count();
+
+    $quizWeight = 1; // Chaque quiz compte comme 1 unité
+    $totalUnits = $totalLessons + $quizWeight;
+    $completedUnits = $completedLessons + 1; // Ajout du quiz comme terminé
+
+    $progress->progress_percent = round(($completedUnits / $totalUnits) * 100, 2);
+    $progress->save();
+
+    return response()->json([
+        'message' => 'Quiz soumis avec succès',
+        'score' => "$correctCount / $total",
+        'percentage' => $score,
+        'results' => $results,
+        'progress_percent' => $progress->progress_percent
+    ]);
+}
+
 
         
 

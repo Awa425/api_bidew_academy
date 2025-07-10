@@ -51,7 +51,7 @@ class Course extends Model
 
         public function quizzes()
     {
-        return $this->hasMany(Quiz::class);
+        return $this->hasOne(Quiz::class);
     }
 
     /**

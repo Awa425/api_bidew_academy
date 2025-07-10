@@ -53,7 +53,88 @@ class LessonUserProgressController extends Controller
      *     )
      * )
      */
-    public function updateProgress(Request $request, $lessonId)
+
+     public function updateProgress(Request $request, $lessonId)
+    {
+        $userId = auth()->id();
+
+        $lesson = Lesson::with('course')->findOrFail($lessonId);
+        $course = $lesson->course;
+
+        // 1. Marquer la leçon comme complétée
+        LessonUserProgress::updateOrCreate(
+            ['lesson_id' => $lesson->id, 'user_id' => $userId],
+            [
+                'is_locked' => false,
+                'is_completed' => true,
+                'completed_at' => now(),
+            ]
+        );
+
+        // 2. Récupération ou création de la progression du cours
+        $progress = CourseUserProgress::firstOrNew([
+            'user_id' => $userId,
+            'course_id' => $course->id
+        ]);
+
+        // 3. Leçons complétées
+        $completedLessons = LessonUserProgress::where('user_id', $userId)
+            ->whereHas('lesson', function ($q) use ($course) {
+                $q->where('course_id', $course->id);
+            })
+            ->where('is_completed', true)
+            ->pluck('lesson_id')
+            ->toArray();
+
+        $totalLessons = Lesson::where('course_id', $course->id)->count();
+
+        // 4. Vérifie si le quiz a été complété
+        $hasQuiz = $course->quizzes()->exists();
+        $quizCompleted = false;
+
+        if ($hasQuiz) {
+            $quiz = $course->quizzes()->first(); // On suppose 1 quiz par cours
+            $quizCompleted = $quiz->userAttempts()->where('user_id', $userId)->exists();
+        }
+
+        // 5. Calcul du pourcentage de progression
+        $lessonPart = $totalLessons > 0
+            ? (count($completedLessons) / $totalLessons)
+            : 0;
+
+        $quizPart = $hasQuiz ? ($quizCompleted ? 1 : 0) : 1; // 1 si pas de quiz
+
+        $progressPercent = round(($lessonPart * 0.9 + $quizPart * 0.1) * 100, 2); // Ex: 90% pour les leçons, 10% pour le quiz
+
+        // 6. Débloquer la prochaine leçon
+        $nextLesson = Lesson::where('course_id', $course->id)
+            ->where('order', '>', $lesson->order)
+            ->orderBy('order')
+            ->first();
+
+        if ($nextLesson) {
+            LessonUserProgress::updateOrCreate(
+                ['lesson_id' => $nextLesson->id, 'user_id' => $userId],
+                ['is_locked' => false]
+            );
+        }
+
+        // 7. Mise à jour de la progression
+        $progress->progress_percent = $progressPercent;
+        $progress->completed_lessons = $completedLessons;
+        $progress->current_lesson_id = $nextLesson?->id;
+        $progress->save();
+
+        return response()->json([
+            'message' => 'Progression mise à jour avec succès.',
+            'completed_lessons' => $completedLessons,
+            'quiz_completed' => $quizCompleted,
+            'next_unlocked_lesson_id' => $nextLesson?->id,
+            'course_progress_percent' => $progressPercent,
+        ]);
+    }
+
+    public function updateProgressOld(Request $request, $lessonId)
     {
         $userId = auth()->id();
 
