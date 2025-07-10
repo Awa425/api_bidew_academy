@@ -1072,6 +1072,45 @@
                     }
                 ]
             }
+        },
+        "/api/users/{id}/details": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Detail complet d'un user",
+                "operationId": "5883c3897b95a28797a2ca12235f4e42",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Détail d'un user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/User"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -1478,6 +1517,10 @@
         {
             "name": "Ressources",
             "description": "Ressources"
+        },
+        {
+            "name": "User",
+            "description": "User"
         }
     ]
 }

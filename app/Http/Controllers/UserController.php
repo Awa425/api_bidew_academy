@@ -7,17 +7,37 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
-{
+{   
+        /**
+     * @OA\Get(
+     *     path="/api/users/{id}/details",
+     *     summary="Detail complet d'un user",
+     *     tags={"User"},
+     *     security={{"sanctumAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Détail d'un user",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/User"))
+     *     )
+     * )
+     */
     public function showDetailDetails($id)
     {
         $user = User::with([
             'courseProgress.course',
             'lessonProgress.lesson' => function ($query) {
                 $query->with('course');
-            }
+            },
+            'userQuizzes.quiz.questions.answers' // chargement des quiz et de leurs relations
         ])->findOrFail($id);
 
-        // Formatage des données
+        // Formatage des cours
         $courses = $user->courseProgress->map(function ($progress) {
             return [
                 'course_id' => $progress->course->id,
@@ -26,12 +46,34 @@ class UserController extends Controller
             ];
         });
 
+        // Leçons complétées
         $lessonsCompleted = $user->lessonProgress->where('is_completed', true)->map(function ($progress) {
             return [
                 'lesson_id' => $progress->lesson->id,
                 'lesson_title' => $progress->lesson->title,
                 'course_title' => $progress->lesson->course->title,
                 'completed_at' => $progress->updated_at->toDateTimeString(),
+            ];
+        });
+
+        // Quiz complétés
+        $quizzes = $user->userQuizzes->map(function ($userQuiz) {
+            return [
+                'quiz_id' => $userQuiz->quiz->id,
+                'quiz_title' => $userQuiz->quiz->title,
+                'score' => $userQuiz->score,
+                'questions' => $userQuiz->quiz->questions->map(function ($question) use ($userQuiz) {
+                    $userAnswer = $userQuiz->answers->firstWhere('question_id', $question->id);
+                    $correctAnswer = $question->answers->firstWhere('is_correct', true);
+                    return [
+                        'question_id' => $question->id,
+                        'question_text' => $question->text,
+                        'correct_answer_id' => $correctAnswer?->id,
+                        'correct_answer_text' => $correctAnswer?->text,
+                        'selected_answer_id' => $userAnswer?->answer_id,
+                        'is_correct' => $userAnswer?->is_correct,
+                    ];
+                }),
             ];
         });
 
@@ -43,11 +85,8 @@ class UserController extends Controller
             ],
             'courses_progress' => $courses,
             'lessons_completed' => $lessonsCompleted,
+            'quizzes_attempted' => $quizzes,
         ]);
-    }
-    public function index()
-    {
-        return response()->json(User::all());
     }
 
     public function show($id)
