@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 
 class LessonUserProgressController extends Controller
 {
+
+    
     /**
      * @OA\Patch(
      *     path="/api/lessons/{lesson}/progress",

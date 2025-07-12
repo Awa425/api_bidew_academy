@@ -116,7 +116,7 @@ class CourseController extends Controller
         if (is_null($course)) {
             return $this->sendError('Course not found.');
         }
-        return response()->json($course->load('user','lessons.contents',  'quizzes.questions' ,'resources', 'evaluations'));
+        return response()->json($course->load('user','lessons.contents',  'quizzes.questions' ,'resources'));
         
     }
 

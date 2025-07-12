@@ -223,7 +223,7 @@ class LessonController extends Controller
         'content.type' => 'sometimes|required|string|in:text,video,pdf,link,jpg,jpeg',
         'content.data' => 'nullable|string',
         'content.external_url' => 'nullable|url',
-        'content.file' => 'nullable|file|mimes:pdf,mp4,avi,mov|max:20480,jpg,jpeg'
+        'content.file' => 'nullable|file|mimes:pdf,mp4,avi,mov,,jpg,jpeg'
     ]);
 
     if ($validator->fails()) {
@@ -237,7 +237,7 @@ class LessonController extends Controller
         'is_published' => $request->input('is_published', $lesson->is_published),
         'is_locked' => $request->input('is_locked', $lesson->is_locked),
     ]);
-
+    // dd($lesson);
     // Traitement du fichier si fourni
     $filePath = null;
     if ($request->hasFile('content.file')) {

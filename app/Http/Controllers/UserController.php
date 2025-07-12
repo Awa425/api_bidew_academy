@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\LessonUserProgress;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -47,15 +48,16 @@ class UserController extends Controller
         });
 
         // Leçons complétées
-        $lessonsCompleted = $user->lessonProgress->where('is_completed', true)->map(function ($progress) {
+        $lessonProgress = $user->lessonProgress->map(function ($progress) {
             return [
                 'lesson_id' => $progress->lesson->id,
                 'lesson_title' => $progress->lesson->title,
                 'course_title' => $progress->lesson->course->title,
+                'is_locked' => $progress->is_locked,
+                'is_completed' => $progress->is_completed,
                 'completed_at' => $progress->updated_at->toDateTimeString(),
             ];
         });
-
         // Quiz complétés
         $quizzes = $user->userQuizzes->map(function ($userQuiz) {
             return [
@@ -84,14 +86,14 @@ class UserController extends Controller
                 'email' => $user->email,
             ],
             'courses_progress' => $courses,
-            'lessons_completed' => $lessonsCompleted,
+            'lessons_progress' => $lessonProgress,
             'quizzes_attempted' => $quizzes,
         ]);
     }
 
     public function show($id)
     {
-        return response()->json(User::findOrFail($id));
+        return response()->json(LessonUserProgress::findOrFail($id));
     }
 
     public function store(Request $request)
