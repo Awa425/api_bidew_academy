@@ -115,6 +115,42 @@
                 }
             }
         },
+        "/api/certificates/{id}": {
+            "get": {
+                "tags": [
+                    "Certificates"
+                ],
+                "summary": "Afficher un certificat",
+                "operationId": "191e2a30f6ace09ac91b4b07289cfa86",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "ID du certificat",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Certificat PDF retourné",
+                        "content": {
+                            "application/pdf": {}
+                        }
+                    },
+                    "404": {
+                        "description": "Certificat introuvable"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            }
+        },
         "/api/courses": {
             "get": {
                 "tags": [
@@ -266,7 +302,7 @@
                 "tags": [
                     "Courses"
                 ],
-                "summary": "Démarrer cours. Première leçon débloquée.",
+                "summary": "Démarrer le cours pour debloquer la première leçon.",
                 "operationId": "a5923a7bbf1c26639f13739c687fd8fb",
                 "parameters": [
                     {
@@ -918,6 +954,17 @@
                 ],
                 "summary": "Lister tous les ressources d'une Leçon",
                 "operationId": "7cfe90180008ecb29e2b5ad7a73ebd33",
+                "parameters": [
+                    {
+                        "name": "lesson",
+                        "in": "path",
+                        "description": "ID de la Leçon",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Liste des ressources",
@@ -932,7 +979,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -1497,6 +1549,10 @@
         {
             "name": "login",
             "description": "login"
+        },
+        {
+            "name": "Certificates",
+            "description": "Certificates"
         },
         {
             "name": "Courses",

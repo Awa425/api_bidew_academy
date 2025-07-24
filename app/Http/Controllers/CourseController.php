@@ -159,7 +159,7 @@ class CourseController extends Controller
             'progression' => 'nullable|integer|min:0|max:100',
             'category' => 'nullable|string',
             'level' => 'nullable|string',
-            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif',
             'duration_minutes' => 'nullable|integer|min:1',
             'is_published' => 'boolean'
         ]);
@@ -185,10 +185,10 @@ class CourseController extends Controller
         ]);
     }
 
-        /**
+    /**
      * @OA\Post(
      *     path="/api/courses/{id}/start",
-     *     summary="Démarrer cours. Première leçon débloquée.",
+     *     summary="Démarrer le cours pour debloquer la première leçon.",
      *     tags={"Courses"},
      *     security={{"sanctumAuth":{}}},
      *     @OA\Parameter(

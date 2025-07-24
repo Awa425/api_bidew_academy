@@ -60,6 +60,12 @@ class User extends Authenticatable
         return $this->hasMany(UserQuiz::class);
     }
 
+    public function completedLessons()
+{
+    return $this->hasMany(LessonUserProgress::class)
+                ->where('is_completed', true);
+}
+
     /**
      * Get the attributes that should be cast.
      *

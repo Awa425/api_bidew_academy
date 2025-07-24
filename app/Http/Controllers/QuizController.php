@@ -41,7 +41,7 @@ class QuizController extends Controller
             ->where('course_id', $coursId)
             ->first();
             
-            if (!$progress || $progress->progress_percent < 100) {
+            if (!$progress || $progress->progress_percent < 90) {
                 return response()->json([
                     'message' => 'Vous devez compléter toutes les leçons du cours avant d’accéder au quiz. Vous etes a '. $progress->progress_percent .' %',
                 ], 403);
@@ -143,7 +143,7 @@ class QuizController extends Controller
      *     operationId="submitQuiz",
      *     tags={"Quiz"},
      *     security={{"sanctumAuth":{}}},
-         *     @OA\Parameter(
+     *     @OA\Parameter(
      *         name="course",
      *         in="path",
      *         required=true,
@@ -223,7 +223,7 @@ public function submit(Request $request)
         ], 403);
     }
 
-    // 📌 Création de l'entrée UserQuiz
+    //  Création de l'entrée UserQuiz
     $userQuiz = $user->userQuizzes()->create([
         'quiz_id' => $quiz->id,
         'score' => 0

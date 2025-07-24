@@ -68,26 +68,32 @@ class LessonController extends Controller
      *     )
      * )
      */
-    public function show(Course $course, Lesson $lesson)
-    {
-        $user = auth()->user();
-        if ($lesson->is_locked) {
-            // Vérifie si l'utilisateur a terminé les leçons précédentes
-            $previousLessons = $course->lessons()
+public function show(Course $course, Lesson $lesson)
+{
+    $user = auth()->user();
+
+    // On récupère les informations de progression pour cette leçon et cet utilisateur
+    $progress = $user->lessonProgress()->where('lesson_id', $lesson->id)->first();
+
+    // Si aucune progression n'existe, on peut considérer que c'est verrouillé
+    if (!$progress || $progress->is_locked) {
+        // Vérifie si l'utilisateur a terminé les leçons précédentes
+        $previousLessons = $course->lessons()
             ->where('order', '<', $lesson->order)
             ->pluck('id');
-            
-            $completed = $user->completedLessons()->whereIn('lesson_id', $previousLessons)->count();
 
-            if ($completed < $previousLessons->count()) {
-                return response()->json([
-                    'error' => 'Cette leçon est verrouillée. Vous devez terminer les leçons précédentes.'
-                ], 403);
-            }
+        $completed = $user->completedLessons()->whereIn('lesson_id', $previousLessons)->count();
+
+        if ($completed < $previousLessons->count()) {
+            return response()->json([
+                'error' => 'Cette leçon est verrouillée. Vous devez terminer les leçons précédentes.'
+            ], 403);
         }
-
-        return response()->json($lesson->load('contents'));
     }
+
+    return response()->json($lesson->load('contents'));
+}
+
 
 
     /**
@@ -230,15 +236,13 @@ class LessonController extends Controller
         return response()->json(['errors' => $validator->errors()], 422);
     }
 
-    // Mise à jour des données de la leçon
     $lesson->update([
         'title' => $request->input('title', $lesson->title),
         'duration_minutes' => $request->input('duration_minutes', $lesson->duration_minutes),
         'is_published' => $request->input('is_published', $lesson->is_published),
         'is_locked' => $request->input('is_locked', $lesson->is_locked),
     ]);
-    // dd($lesson);
-    // Traitement du fichier si fourni
+ 
     $filePath = null;
     if ($request->hasFile('content.file')) {
         $file = $request->file('content.file');

@@ -17,6 +17,14 @@ class ResourceController extends Controller
      *     path="/api/lesson/{lesson}/resources",
      *     summary="Lister tous les ressources d'une Leçon",
      *     tags={"Ressources"},
+     *     security={{"sanctumAuth":{}}},
+     *     @OA\Parameter(
+     *         name="lesson",
+     *         in="path",
+     *         description="ID de la Leçon",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Liste des ressources",
@@ -25,8 +33,8 @@ class ResourceController extends Controller
      * )
      */
     public function index($lesson){
-        $ressources = Resource::where('lesson_id', $lesson)
-                                ->paginate(10);
+        $ressources = Resource::where('lesson_id', $lesson)->get();
+          
         return response()->json($ressources);
 
     }
@@ -66,7 +74,7 @@ class ResourceController extends Controller
             'title' => 'required|string',
             'type' => 'required|in:pdf,video,link,text',
             'description' => 'nullable|string',
-            'path' => 'nullable|file|mimes:pdf,mp4,avi,mov|max:20480',
+            'path' => 'nullable|file|mimes:pdf,mp4,avi,mov',
             'external_url' => 'nullable|url',
         ]);
 
@@ -121,27 +129,47 @@ class ResourceController extends Controller
      *     @OA\Response(response=404, description="Ressource non trougvé")
      * )
      */
-    public function update(Request $request, Resource $resource)
-    { dd("resource");
-          // Vérification de l'autorisation
-    $userId = auth()->id();
-    if ($userId !== $resource->lesson->course->user_id) {
-        return response()->json([
-            'error' => 'Vous n\'avez pas la permission de créer une leçon pour ce cours.',
-        ], 403);
-    }
+    public function update(Request $request, Lesson $lesson, Resource $resource)
+    {
+        $userId = auth()->id();
 
-        $data = $request->validate([
-            'title' => 'sometimes|required|string',
-            'type' => 'sometimes|required|in:pdf,video,link',
-            'path' => 'nullable|string',
+        // Vérifie si l'utilisateur est autorisé à modifier cette ressource
+        if ($userId !== $lesson->course->user_id) {
+            return response()->json(['error' => 'Non autorisé à modifier une ressource de cette leçon.'], 403);
+        }
+
+        // Vérifie que la ressource appartient bien à la leçon
+        if ($resource->lesson_id !== $lesson->id) {
+            return response()->json(['error' => 'Cette ressource ne correspond pas à la leçon spécifiée.'], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'title' => 'sometimes|string',
+            'type' => 'sometimes|in:pdf,video,link,text',
             'description' => 'nullable|string',
-            'is_downloadable' => 'boolean',
+            'path' => 'nullable|file|mimes:pdf,mp4,avi,mov,jpg,jpeg,mkv',
+            // 'external_url' => 'nullable|url',
         ]);
 
-        $resource->update($data);
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        if ($request->hasFile('path')) {
+            $filePath = $request->file('path')->store('resources', 'public');
+            $resource->path = $filePath;
+        }
+
+        $resource->title = $request->get('title', $resource->title);
+        $resource->type = $request->get('type', $resource->type);
+        $resource->description = $request->get('description', $resource->description);
+        // $resource->external_url = $request->get('external_url', $resource->external_url);
+
+        $resource->save();
+
         return response()->json($resource);
     }
+
 
     /**
      * @OA\Delete(

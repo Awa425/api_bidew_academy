@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CertificateController;
 use App\Http\Controllers\LessonUserProgressController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\CourseController;
@@ -86,6 +87,12 @@ Route::middleware(['auth:sanctum', 'role:admin,formateur,apprenant'])->group(fun
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/courses/{courseId}/progress', [CourseProgressController::class, 'getProgress']);
     Route::post('/courses/{courseId}/progress', [CourseProgressController::class, 'updateProgress']);
+});
+
+ /******************* Certificates Routes ****************************** */
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('certificates/{id}', [CertificateController::class, 'show']);
+    Route::post('certificates/generate', [CertificateController::class, 'generate']);
 });
 
 
