@@ -83,6 +83,7 @@ class UserController extends Controller
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
+                'role' => $user->role,
                 'email' => $user->email,
             ],
             'courses_progress' => $courses,
