@@ -33,6 +33,17 @@ class CourseController extends Controller
         return response()->json($courses);
     }
 
+    public function getCoursByFormateur($userId)
+    { 
+        // $userId = auth()->id();
+        // dd($userId);
+        $courses = Course::with(['lessons.contents', 'resources', 'quizzes.questions' ,'evaluations'])
+            ->where('id', $userId)      
+            ->paginate(10);
+
+        return response()->json($courses);
+    }
+
     /**
      * @OA\Post(
      *     path="/api/courses",
