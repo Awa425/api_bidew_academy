@@ -33,6 +33,25 @@ class CourseController extends Controller
         return response()->json($courses);
     }
 
+        /**
+     * @OA\Get(
+     *     path="/api/courses/user/{id}",
+     *     summary="Get By formateur",
+     *     tags={"Courses"},
+     *     security={{"sanctumAuth":{}}},
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Course data",
+     *         @OA\JsonContent(ref="#/components/schemas/Course")
+     *     )
+     * )
+     */
     public function getCoursByFormateur($userId)
     { 
         // $userId = auth()->id();

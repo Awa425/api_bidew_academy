@@ -212,6 +212,42 @@
                 ]
             }
         },
+        "/api/courses/user/{id}": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Get By formateur",
+                "operationId": "1b7e429163454ec1bc3d699df0287190",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Course data",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
+            }
+        },
         "/api/courses/{id}": {
             "get": {
                 "tags": [
