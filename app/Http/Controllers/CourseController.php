@@ -57,10 +57,11 @@ class CourseController extends Controller
         // $userId = auth()->id();
         // dd($userId);
         $courses = Course::with(['lessons.contents', 'resources', 'quizzes.questions' ,'evaluations'])
-            ->where('id', $userId)      
+            ->where('user_id', $userId)      
             ->paginate(10);
 
         return response()->json($courses);
+        
     }
 
     /**
