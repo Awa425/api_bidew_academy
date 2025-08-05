@@ -9,6 +9,7 @@ use App\Http\Controllers\CourseProgressController;
 use App\Http\Controllers\LessonController;
 use App\Http\Controllers\ResourceController;
 use App\Http\Controllers\EvaluationController;
+use App\Http\Controllers\FileController;
 use App\Http\Controllers\QuizController;
 use App\Http\Controllers\SocialAuthController;
 use Illuminate\Http\Request;
@@ -95,5 +96,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('certificates/{id}', [CertificateController::class, 'show']);
     Route::post('certificates/generate', [CertificateController::class, 'generate']);
 });
+
+
+// Route pour servir les fichiers avec gestion des noms de fichiers complexes
+Route::get('/lessons/files/{filename}', [FileController::class, 'serveFile'])
+      ->where('filename', '.*')  // Permet les points et autres caractères dans le nom
+      ->name('serve.file');
 
 
