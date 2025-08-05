@@ -98,7 +98,7 @@
             <div class="recipient">{{ $user->name }}</div>
 
             <p>pour avoir complété avec succès le module</p>
-            <div class="course-title">{{ $course->title }}</div>
+            <!-- <div class="course-title">{{ $course->title }}</div> -->
 
             <p><strong>{{ \Carbon\Carbon::parse($issued_at)->format('F d, Y') }}</strong></p>
             <p>Code de certification : {{ $code }}</p>

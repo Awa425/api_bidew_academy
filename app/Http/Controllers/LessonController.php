@@ -72,17 +72,23 @@ public function show(Course $course, Lesson $lesson)
 {
     $user = auth()->user();
 
-    // On récupère les informations de progression pour cette leçon et cet utilisateur
+    // Si l'utilisateur est un formateur ou un admin, pas de restriction
+    if ($user->role == "admin" || $user->role == "formateur") {
+        return response()->json($lesson->load('contents'));
+    }
+
+    // Apprenant : on vérifie l'accès à la leçon
     $progress = $user->lessonProgress()->where('lesson_id', $lesson->id)->first();
 
-    // Si aucune progression n'existe, on peut considérer que c'est verrouillé
+    // Si la leçon est verrouillée ou pas encore commencée
     if (!$progress || $progress->is_locked) {
-        // Vérifie si l'utilisateur a terminé les leçons précédentes
         $previousLessons = $course->lessons()
             ->where('order', '<', $lesson->order)
             ->pluck('id');
 
-        $completed = $user->completedLessons()->whereIn('lesson_id', $previousLessons)->count();
+        $completed = $user->completedLessons()
+            ->whereIn('lesson_id', $previousLessons)
+            ->count();
 
         if ($completed < $previousLessons->count()) {
             return response()->json([
@@ -93,6 +99,7 @@ public function show(Course $course, Lesson $lesson)
 
     return response()->json($lesson->load('contents'));
 }
+
 
 
 
