@@ -15,7 +15,7 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            /* background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png'); */
         }
         .logo {
             max-width: 200px;
@@ -26,13 +26,13 @@
         .certificate {
             width: 800px;
             height: 600px;
-            background-color: #fffdf6;
+            background-color: white;
             padding: 50px;
             margin-left: 50px;
             text-align: center;
             position: relative;
             overflow: hidden;
-            border: 1px solid #e0d5bc;
+            border: 1px solid #182b5c;
         }
         
         .certificate:before, .certificate:after {
@@ -40,7 +40,7 @@
             position: absolute;
             width: 100px;
             height: 100px;
-            border: 8px solid #d4b97a;
+            border: 8px solid #182b5c;
         }
         
         .certificate:before {
@@ -67,29 +67,29 @@
         .corner-1 {
             top: 0;
             left: 0;
-            border-top: 3px solid #8b7355;
-            border-left: 3px solid #8b7355;
+            border-top: 10px solid #182b5c;
+            border-left: 10px solid #182b5c;
         }
         
         .corner-2 {
             top: 0;
             right: 0;
-            border-top: 3px solid #8b7355;
-            border-right: 3px solid #8b7355;
+            border-top: 10px solid #182b5c;
+            border-right: 10px solid #182b5c;
         }
         
         .corner-3 {
             bottom: 0;
             left: 0;
-            border-bottom: 3px solid #8b7355;
-            border-left: 3px solid #8b7355;
+            border-bottom: 10px solid #182b5c;
+            border-left: 10px solid #182b5c;
         }
         
         .corner-4 {
             bottom: 0;
             right: 0;
-            border-bottom: 3px solid #8b7355;
-            border-right: 3px solid #8b7355;
+            border-bottom: 10px solid #182b5c;
+            border-right: 10px solid #182b5c;
         }
         
         h1 {
