@@ -17,6 +17,11 @@
             min-height: 100vh;
             background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
         }
+        .logo {
+            max-width: 200px;
+            max-height: 100px;
+            margin: 0 auto;
+        }
         
         .certificate {
             width: 800px;
@@ -230,6 +235,10 @@
             <div class="corner-decoration corner-2"></div>
             <div class="corner-decoration corner-3"></div>
             <div class="corner-decoration corner-4"></div>
+
+            <div class="logo-container">
+                <img src="/public/assets/logo.png" alt="Logo Bideew Technologie" class="logo">
+            </div>
             
             <h1>Certificat d'achèvement</h1>
             
