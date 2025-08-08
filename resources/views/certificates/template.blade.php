@@ -233,21 +233,21 @@
             
             <h1>Certificat d'achèvement</h1>
             
-            <h2>Khadija Fall</h2>
+            <h2>{{ $user->name }}</h2>
             
             <h3>a bien réussi le cours</h3>
             
-            <div class="course-name">Explorer les outils d'accessibilité de Windows 11</div>
+            <div class="course-name">{{ $course->title }} {{ $course->objectif }}</div>
             
-            <div class="details">Windows 11 durée: 30 m</div>
-            <div class="details">le 24 avril 2025</div>
+            <div class="details">Code de certification : {{ $code }}</div>
+            <div class="details">{{ \Carbon\Carbon::parse($issued_at)->format('F d, Y') }}</div>
             
             <div class="separator"></div>
             
-            <div class="academy">DIGITECH ACADEMY</div>
-            <div class="year">2025</div>
+            <div class="academy">Bideew Technologie INSTRUCTOR</div>
+            <!-- <div class="year">2025</div> -->
             
-            <div class="stamp">Certifié<br>Valide</div>
+            <!-- <div class="stamp">Certifié<br>Valide</div> -->
         </div>
     </div>
 </body>

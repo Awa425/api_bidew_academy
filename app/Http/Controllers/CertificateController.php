@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Certificate;
+use App\Models\Course;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CertificateController extends Controller
@@ -33,6 +35,7 @@ class CertificateController extends Controller
     public function show($id)
     {
         $certificate = Certificate::with(['user', 'course'])->findOrFail($id);
+        // dd($certificate);
         $pdf = Pdf::loadView('certificates.template', [
             'user' => $certificate->user,
             'course' => $certificate->course,
@@ -50,27 +53,30 @@ class CertificateController extends Controller
         ]);
 
         $user = auth()->user();
+        $course = Course::findOrFail($request->course_id); 
         $code = Str::uuid();
         $path = 'certificates/' . $code . '.pdf';
-
+       
         $pdf = Pdf::loadView('certificates.template', [
             'user' => $user,
-            'course' => $request->course_id,
+            'course' => $course, 
             'issued_at' => now(),
             'code' => $code
         ]);
-        
 
-        \Storage::put('public/' . $path, $pdf->output());
+        Storage::put('public/' . $path, $pdf->output());
 
         $certificate = Certificate::create([
             'user_id' => $user->id,
-            'course_id' => $request->course_id,
+            'course_id' => $course->id,
             'certificate_code' => $code,
             'certificate_path' => $path,
             'issued_at' => now(),
         ]);
 
-        return response()->json(['message' => 'Certificat généré', 'certificate_id' => $certificate->id], 201);
+        return response()->json([
+            'message' => 'Certificat généré',
+            'certificate_id' => $certificate->id
+        ], 201);
     }
 }
