@@ -81,7 +81,7 @@ class QuizController extends Controller
      *     @OA\Response(response=400, description="Données invalides")
      * )
      */
-     public function store(Request $request, Course $course) {
+     public function store_without_validated_15_question(Request $request, Course $course) {
 
         $userId = auth()->id();
 
@@ -134,6 +134,72 @@ class QuizController extends Controller
                     'Quiz'=>$quiz->load('questions.answers')], 201);
            
     }
+    public function store(Request $request, Course $course)
+{
+    $userId = auth()->id();
+
+    // Vérifier que seul le propriétaire du cours peut créer le quiz
+    if ($userId !== $course->user_id) {
+        return response()->json([
+            'error' => 'Vous n\'avez pas la permission de publier une évaluation pour ce cours.',
+            'debug' => [
+                'current_user_id' => $userId,
+                'course_user_id' => $course->user_id
+            ]
+        ], 403);
+    }
+
+    // Validation basique des champs
+    $validator = Validator::make($request->all(), [
+        'title' => 'required|string',
+        'description' => 'nullable|string',
+        'questions' => 'required|array',
+        'questions.*.type' => 'required|in:multiple_choice,single_choice,text',
+        'questions.*.text' => 'required|string',
+        'questions.*.answers' => 'required|array|min:1',
+        'questions.*.answers.*.text' => 'required|string',
+        'questions.*.answers.*.is_correct' => 'required|boolean',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
+    }
+
+    // Vérifier qu'il y a minimum 20 questions
+    if (count($request->questions) < 20) {
+        return response()->json([
+            'error' => 'Chaque quiz doit contenir minimum 30 questions.',
+            'nb_questions_envoyees' => count($request->questions)
+        ], 422);
+    }
+
+    // Création du quiz
+    $quiz = $course->quizzes()->create([
+        'title' => $request->title,
+        'description' => $request->description,
+    ]);
+
+    // Sauvegarde des 15 questions et de leurs réponses
+    foreach ($request->questions as $questionData) {
+        $question = $quiz->questions()->create([
+            'type' => $questionData['type'],
+            'text' => $questionData['text'],
+        ]);
+
+        foreach ($questionData['answers'] as $answerData) {
+            $question->answers()->create([
+                'text' => $answerData['text'],
+                'is_correct' => $answerData['is_correct'],
+            ]);
+        }
+    }
+
+    return response()->json([
+        'message' => 'Quiz créé avec succès avec minimum 30 questions.',
+        'quiz' => $quiz->load('questions.answers')
+    ], 201);
+}
+
 
     /**
      * @OA\Post(
