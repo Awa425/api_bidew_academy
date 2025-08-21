@@ -272,3 +272,71 @@
     }
   ]
 }
+
+# Payload pour submit quiz
+    {
+  "quiz_id": 1,
+  "answers": [
+    {
+      "question_id": 101,
+      "answer_ids": [501] 
+    },
+    {
+      "question_id": 102,
+      "answer_ids": [505, 506] 
+    },
+    {
+      "question_id": 103,
+      "answer_ids": [] 
+    },
+    {
+      "question_id": 104,
+      "answer_ids": [512]
+    },
+    {
+      "question_id": 105,
+      "answer_ids": [520, 521]
+    },
+    {
+      "question_id": 106,
+      "answer_ids": [530]
+    },
+    {
+      "question_id": 107,
+      "answer_ids": [540]
+    },
+    {
+      "question_id": 108,
+      "answer_ids": [545, 546]
+    },
+    {
+      "question_id": 109,
+      "answer_ids": [] 
+    },
+    {
+      "question_id": 110,
+      "answer_ids": [560]
+    },
+    {
+      "question_id": 111,
+      "answer_ids": [570, 571]
+    },
+    {
+      "question_id": 112,
+      "answer_ids": [580]
+    },
+    {
+      "question_id": 113,
+      "answer_ids": [590, 591]
+    },
+    {
+      "question_id": 114,
+      "answer_ids": [600]
+    },
+    {
+      "question_id": 115,
+      "answer_ids": [] 
+    }
+  ]
+}
+

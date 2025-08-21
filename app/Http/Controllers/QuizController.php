@@ -57,216 +57,250 @@ class QuizController extends Controller
         return response()->json($quizzes->load('questions.answers'));
     }
 
-    /**
-     * @OA\Post(
-     *      path="/api/courses/{course}/quizzes",
-     *      summary="Création de nouvelle quiz",
-     *      tags={"Quiz"},
-     *      security={{"sanctumAuth":{}}},
-     *      @OA\Parameter(
-     *         name="course",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *      @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/Quiz")
-     *      ),
-     *     @OA\Response(
-     *         response=201,
-     *         description="Leçon créé avec succès",
-     *         @OA\JsonContent(ref="#/components/schemas/Quiz")
-     *     ),
-     *     @OA\Response(response=400, description="Données invalides")
-     * )
-     */
-     public function store_without_validated_15_question(Request $request, Course $course) {
+/**
+ * @OA\Post(
+ *     path="/api/courses/{course}/quizzes",
+ *     summary="Créer un quiz pour un cours",
+ *     description="Permet à l’utilisateur (formateur) d’ajouter un quiz avec 15 à 30 questions et leurs réponses",
+ *     tags={"Quiz"},
+ *     security={{"sanctumAuth":{}}},
+ * 
+ *     @OA\Parameter(
+ *         name="course",
+ *         in="path",
+ *         required=true,
+ *         description="ID du cours",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
+ * 
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             required={"title","questions"},
+ *             @OA\Property(property="title", type="string", example="Quiz Avancé Programmation"),
+ *             @OA\Property(property="description", type="string", example="Évaluation approfondie des connaissances en programmation"),
+ *             @OA\Property(
+ *                 property="questions",
+ *                 type="array",
+ *                 minItems=15,
+ *                 maxItems=30,
+ *                 @OA\Items(
+ *                     type="object",
+ *                     required={"type","text","answers"},
+ *                     @OA\Property(property="type", type="string", enum={"single_choice","multiple_choice","text"}, example="single_choice"),
+ *                     @OA\Property(property="text", type="string", example="Quel est le mot-clé pour définir une fonction en PHP ?"),
+ *                     @OA\Property(
+ *                         property="answers",
+ *                         type="array",
+ *                         minItems=1,
+ *                         @OA\Items(
+ *                             type="object",
+ *                             required={"text","is_correct"},
+ *                             @OA\Property(property="text", type="string", example="function"),
+ *                             @OA\Property(property="is_correct", type="boolean", example=true)
+ *                         )
+ *                     )
+ *                 )
+ *             )
+ *         )
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=201,
+ *         description="Quiz créé avec succès",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="Quiz", type="object",
+ *                 @OA\Property(property="id", type="integer", example=10),
+ *                 @OA\Property(property="title", type="string", example="Quiz Avancé Programmation"),
+ *                 @OA\Property(property="description", type="string", example="Évaluation approfondie des connaissances"),
+ *                 @OA\Property(property="questions", type="array",
+ *                     @OA\Items(
+ *                         type="object",
+ *                         @OA\Property(property="id", type="integer", example=101),
+ *                         @OA\Property(property="type", type="string", example="single_choice"),
+ *                         @OA\Property(property="text", type="string", example="Quel est le mot-clé pour définir une fonction en PHP ?"),
+ *                         @OA\Property(property="answers", type="array",
+ *                             @OA\Items(
+ *                                 type="object",
+ *                                 @OA\Property(property="id", type="integer", example=501),
+ *                                 @OA\Property(property="text", type="string", example="function"),
+ *                                 @OA\Property(property="is_correct", type="boolean", example=true)
+ *                             )
+ *                         )
+ *                     )
+ *                 )
+ *             )
+ *         )
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=403,
+ *         description="Accès refusé (seul le formateur du cours peut ajouter un quiz)"
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=422,
+ *         description="Erreur de validation (format du payload incorrect)"
+ *     )
+ * )
+ */
 
+    public function store(Request $request, Course $course)
+    {
         $userId = auth()->id();
 
-        $courseUserId = $course->user_id;
-        if ($userId !== $courseUserId) {
+        // Vérifier que seul le propriétaire du cours peut créer le quiz
+        if ($userId !== $course->user_id) {
             return response()->json([
-                'error' => 'Vous n\'avez pas la permission de publier une cette evaluation pour ce cours.',
+                'error' => 'Vous n\'avez pas la permission de publier une évaluation pour ce cours.',
                 'debug' => [
                     'current_user_id' => $userId,
-                    'course_user_id' => $courseUserId
-                    ]
-                ], 403);
+                    'course_user_id' => $course->user_id
+                ]
+            ], 403);
         }
-        
-        $validator = Validator::make($request->all(),[
-        'title' => 'required|string',
-        'description' => 'nullable|string',
-        'questions' => 'required|array|min:1',
-        'questions.*.type' => 'required|in:multiple_choice,single_choice,text',
-        'questions.*.text' => 'required|string',
-        'questions.*.answers' => 'required|array|min:1',
-        'questions.*.answers.*.text' => 'required|string',
-        'questions.*.answers.*.is_correct' => 'required|boolean',
+
+        // Validation basique des champs
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string',
+            'description' => 'nullable|string',
+            'questions' => 'required|array',
+            'questions.*.type' => 'required|in:multiple_choice,single_choice,text',
+            'questions.*.text' => 'required|string',
+            'questions.*.answers' => 'required|array|min:1',
+            'questions.*.answers.*.text' => 'required|string',
+            'questions.*.answers.*.is_correct' => 'required|boolean',
         ]);
-  
+
         if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
+            return response()->json(['errors' => $validator->errors()], 422);
         }
 
-            // Creation Quizz
-            $quiz = $course->quizzes()->create([
-                'title' => $request->title,
-                'description' => $request->description,
-            ]);
+        // Vérifier qu'il y a minimum 20 questions
+        if (count($request->questions) < 20) {
+            return response()->json([
+                'error' => 'Chaque quiz doit contenir minimum 30 questions.',
+                'nb_questions_envoyees' => count($request->questions)
+            ], 422);
+        }
 
-            foreach ($request->questions as $questionData) {
-                $question = $quiz->questions()->create([
-                    'type' => $questionData['type'],
-                    'text' => $questionData['text'],
-                 ]);
-    
-                foreach ($questionData['answers'] as $answerData) {
-                    $question->answers()->create([
-                        'text' => $answerData['text'],
-                        'is_correct' => $answerData['is_correct'],
-                    ]);
-                }
-            }
-                return response()->json([
-                    'Quiz'=>$quiz->load('questions.answers')], 201);
-           
-    }
-    public function store(Request $request, Course $course)
-{
-    $userId = auth()->id();
-
-    // Vérifier que seul le propriétaire du cours peut créer le quiz
-    if ($userId !== $course->user_id) {
-        return response()->json([
-            'error' => 'Vous n\'avez pas la permission de publier une évaluation pour ce cours.',
-            'debug' => [
-                'current_user_id' => $userId,
-                'course_user_id' => $course->user_id
-            ]
-        ], 403);
-    }
-
-    // Validation basique des champs
-    $validator = Validator::make($request->all(), [
-        'title' => 'required|string',
-        'description' => 'nullable|string',
-        'questions' => 'required|array',
-        'questions.*.type' => 'required|in:multiple_choice,single_choice,text',
-        'questions.*.text' => 'required|string',
-        'questions.*.answers' => 'required|array|min:1',
-        'questions.*.answers.*.text' => 'required|string',
-        'questions.*.answers.*.is_correct' => 'required|boolean',
-    ]);
-
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 422);
-    }
-
-    // Vérifier qu'il y a minimum 20 questions
-    if (count($request->questions) < 20) {
-        return response()->json([
-            'error' => 'Chaque quiz doit contenir minimum 30 questions.',
-            'nb_questions_envoyees' => count($request->questions)
-        ], 422);
-    }
-
-    // Création du quiz
-    $quiz = $course->quizzes()->create([
-        'title' => $request->title,
-        'description' => $request->description,
-    ]);
-
-    // Sauvegarde des 15 questions et de leurs réponses
-    foreach ($request->questions as $questionData) {
-        $question = $quiz->questions()->create([
-            'type' => $questionData['type'],
-            'text' => $questionData['text'],
+        // Création du quiz
+        $quiz = $course->quizzes()->create([
+            'title' => $request->title,
+            'description' => $request->description,
         ]);
 
-        foreach ($questionData['answers'] as $answerData) {
-            $question->answers()->create([
-                'text' => $answerData['text'],
-                'is_correct' => $answerData['is_correct'],
+        // Sauvegarde des 15 questions et de leurs réponses
+        foreach ($request->questions as $questionData) {
+            $question = $quiz->questions()->create([
+                'type' => $questionData['type'],
+                'text' => $questionData['text'],
             ]);
+
+            foreach ($questionData['answers'] as $answerData) {
+                $question->answers()->create([
+                    'text' => $answerData['text'],
+                    'is_correct' => $answerData['is_correct'],
+                ]);
+            }
         }
+
+        return response()->json([
+            'message' => 'Quiz créé avec succès avec minimum 30 questions.',
+            'quiz' => $quiz->load('questions.answers')
+        ], 201);
     }
-
-    return response()->json([
-        'message' => 'Quiz créé avec succès avec minimum 30 questions.',
-        'quiz' => $quiz->load('questions.answers')
-    ], 201);
-}
-
 
     /**
-     * @OA\Post(
-     *     path="/api/courses/{course}/quizzes/submit",
-     *     summary="Soumettre un quiz avec les réponses de l'utilisateur",
-     *     description="Soumet les réponses de l'utilisateur à un quiz, enregistre les résultats, et calcule le score.",
-     *     operationId="submitQuiz",
-     *     tags={"Quiz"},
-     *     security={{"sanctumAuth":{}}},
-     *     @OA\Parameter(
-     *         name="course",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\JsonContent(
-     *             required={"quiz_id", "answers"},
-     *             @OA\Property(property="quiz_id", type="integer", example=1),
-     *             @OA\Property(
-     *                 property="answers",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     @OA\Property(property="question_id", type="integer", example=10),
-     *                     @OA\Property(
-     *                         property="answer_ids",
-     *                         type="array",
-     *                         @OA\Items(type="integer", example=42)
-     *                     )
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Quiz soumis avec succès",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="message", type="string", example="Quiz soumis avec succès"),
-     *             @OA\Property(property="score", type="string", example="3/5"),
-     *             @OA\Property(property="percentage", type="number", format="float", example=60.00),
-     *             @OA\Property(
-     *                 property="results",
-     *                 type="array",
-     *                 @OA\Items(
-     *                     @OA\Property(property="question_id", type="integer", example=10),
-     *                     @OA\Property(property="correct_answer_ids", type="array", @OA\Items(type="integer")),
-     *                     @OA\Property(property="selected_answer_ids", type="array", @OA\Items(type="integer")),
-     *                     @OA\Property(property="is_correct", type="boolean", example=true)
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Déjà effectué"
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Quiz non trouvé"
-     *     )
-     * )
-     */
+ * @OA\Post(
+ *     path="/api/courses/{course}/quizzes/submit",
+ *     summary="Soumettre un quiz et calculer le score",
+ *     description="Permet à un utilisateur (apprenant) de soumettre ses réponses à un quiz. 
+ *                  Le quiz doit contenir 15 questions, et au moins 12 bonnes réponses (80%) 
+ *                  sont nécessaires pour valider.",
+ *     tags={"Quiz"},
+ *     security={{"sanctumAuth":{}}},
+ * 
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\JsonContent(
+ *             type="object",
+ *             required={"quiz_id", "answers"},
+ *             @OA\Property(
+ *                 property="quiz_id",
+ *                 type="integer",
+ *                 example=1,
+ *                 description="ID du quiz auquel l'utilisateur répond"
+ *             ),
+ *             @OA\Property(
+ *                 property="answers",
+ *                 type="array",
+ *                 description="Liste des réponses de l'utilisateur aux questions du quiz",
+ *                 @OA\Items(
+ *                     type="object",
+ *                     required={"question_id", "answer_ids"},
+ *                     @OA\Property(
+ *                         property="question_id",
+ *                         type="integer",
+ *                         example=101,
+ *                         description="ID de la question"
+ *                     ),
+ *                     @OA\Property(
+ *                         property="answer_ids",
+ *                         type="array",
+ *                         description="IDs des réponses choisies (vide si question de type 'text')",
+ *                         @OA\Items(type="integer", example=501)
+ *                     )
+ *                 )
+ *             )
+ *         )
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=200,
+ *         description="Quiz soumis avec succès",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Quiz soumis avec succès"),
+ *             @OA\Property(property="score", type="string", example="12 / 15"),
+ *             @OA\Property(property="percentage", type="number", example=80.0),
+ *             @OA\Property(
+ *                 property="results",
+ *                 type="array",
+ *                 @OA\Items(
+ *                     type="object",
+ *                     @OA\Property(property="question_id", type="integer", example=101),
+ *                     @OA\Property(property="selected_answer_ids", type="array", @OA\Items(type="integer")),
+ *                     @OA\Property(property="correct_answer_ids", type="array", @OA\Items(type="integer")),
+ *                     @OA\Property(property="is_correct", type="boolean", example=true)
+ *                 )
+ *             ),
+ *             @OA\Property(property="progress_percent", type="number", example=100)
+ *         )
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=403,
+ *         description="Accès refusé ou quiz déjà soumis",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="message", type="string", example="Vous avez déjà soumis ce quiz.")
+ *         )
+ *     ),
+ * 
+ *     @OA\Response(
+ *         response=422,
+ *         description="Erreur de validation",
+ *         @OA\JsonContent(
+ *             type="object",
+ *             @OA\Property(property="errors", type="object")
+ *         )
+ *     )
+ * )
+ */
+
 public function submit(Request $request)
 {
     $user = auth()->user();
@@ -281,7 +315,7 @@ public function submit(Request $request)
 
     $quiz = Quiz::with('questions.answers', 'course')->findOrFail($data['quiz_id']);
 
-    // 🔐 Empêcher de refaire le quiz
+    // Empêcher de refaire le quiz
     $alreadyAttempted = $user->userQuizzes()->where('quiz_id', $quiz->id)->exists();
     if ($alreadyAttempted) {
         return response()->json([
@@ -331,34 +365,40 @@ public function submit(Request $request)
     // 📝 Mise à jour du score
     $userQuiz->update(['score' => $score]);
 
-    // 📈 Mise à jour de course_user_progress
+    // ⚠️ Vérification du seuil de validation (80%)
+    $minimumCorrect = ceil($total * 0.8); // arrondi au supérieur
+    $validated = $correctCount >= $minimumCorrect;
+
+    if (!$validated) {
+        return response()->json([
+            'message' => "Échec  : Vous devez obtenir au moins 80% ($minimumCorrect bonnes réponses sur $total).",
+            'score' => "$correctCount / $total",
+            'percentage' => $score,
+            'results' => $results,
+            'validated' => false
+        ], 403);
+    }
+
+    // Mise à jour de course_user_progress
     $progress = CourseUserProgress::firstOrNew([
         'user_id' => $user->id,
         'course_id' => $quiz->course_id
     ]);
 
-    // S'assurer que les leçons sont déjà prises en compte
-    $totalLessons = $quiz->course->lessons()->count();
-    $completedLessons = LessonUserProgress::where('user_id', $user->id)
-        ->whereHas('lesson', fn($q) => $q->where('course_id', $quiz->course_id))
-        ->where('is_completed', true)
-        ->count();
-
-    $quizWeight = 1; // Chaque quiz compte comme 1 unité
-    $totalUnits = $totalLessons + $quizWeight;
-    $completedUnits = $completedLessons + 1; // Ajout du quiz comme terminé
-
-    $progress->progress_percent = round(($completedUnits / $totalUnits) * 100, 2);
+    // si le quiz est validé → cours terminé à 100%
+    $progress->progress_percent = 100;
     $progress->save();
 
     return response()->json([
-        'message' => 'Quiz soumis avec succès',
+        'message' => 'Quiz validé avec succès 🎉',
         'score' => "$correctCount / $total",
         'percentage' => $score,
         'results' => $results,
+        'validated' => true,
         'progress_percent' => $progress->progress_percent
     ]);
 }
+
 
 
         

@@ -811,15 +811,18 @@
                 "tags": [
                     "Quiz"
                 ],
-                "summary": "Création de nouvelle quiz",
+                "summary": "Créer un quiz pour un cours",
+                "description": "Permet à l’utilisateur (formateur) d’ajouter un quiz avec 15 à 30 questions et leurs réponses",
                 "operationId": "0356317b77518a698e70bac4e788c672",
                 "parameters": [
                     {
                         "name": "course",
                         "in": "path",
+                        "description": "ID du cours",
                         "required": true,
                         "schema": {
-                            "type": "integer"
+                            "type": "integer",
+                            "example": 1
                         }
                     }
                 ],
@@ -828,24 +831,149 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Quiz"
+                                "required": [
+                                    "title",
+                                    "questions"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Quiz Avancé Programmation"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Évaluation approfondie des connaissances en programmation"
+                                    },
+                                    "questions": {
+                                        "type": "array",
+                                        "items": {
+                                            "required": [
+                                                "type",
+                                                "text",
+                                                "answers"
+                                            ],
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "enum": [
+                                                        "single_choice",
+                                                        "multiple_choice",
+                                                        "text"
+                                                    ],
+                                                    "example": "single_choice"
+                                                },
+                                                "text": {
+                                                    "type": "string",
+                                                    "example": "Quel est le mot-clé pour définir une fonction en PHP ?"
+                                                },
+                                                "answers": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "required": [
+                                                            "text",
+                                                            "is_correct"
+                                                        ],
+                                                        "properties": {
+                                                            "text": {
+                                                                "type": "string",
+                                                                "example": "function"
+                                                            },
+                                                            "is_correct": {
+                                                                "type": "boolean",
+                                                                "example": true
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "minItems": 1
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "maxItems": 30,
+                                        "minItems": 15
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
                     }
                 },
                 "responses": {
                     "201": {
-                        "description": "Leçon créé avec succès",
+                        "description": "Quiz créé avec succès",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Quiz"
+                                    "properties": {
+                                        "Quiz": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 10
+                                                },
+                                                "title": {
+                                                    "type": "string",
+                                                    "example": "Quiz Avancé Programmation"
+                                                },
+                                                "description": {
+                                                    "type": "string",
+                                                    "example": "Évaluation approfondie des connaissances"
+                                                },
+                                                "questions": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "id": {
+                                                                "type": "integer",
+                                                                "example": 101
+                                                            },
+                                                            "type": {
+                                                                "type": "string",
+                                                                "example": "single_choice"
+                                                            },
+                                                            "text": {
+                                                                "type": "string",
+                                                                "example": "Quel est le mot-clé pour définir une fonction en PHP ?"
+                                                            },
+                                                            "answers": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "properties": {
+                                                                        "id": {
+                                                                            "type": "integer",
+                                                                            "example": 501
+                                                                        },
+                                                                        "text": {
+                                                                            "type": "string",
+                                                                            "example": "function"
+                                                                        },
+                                                                        "is_correct": {
+                                                                            "type": "boolean",
+                                                                            "example": true
+                                                                        }
+                                                                    },
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
                                 }
                             }
                         }
                     },
-                    "400": {
-                        "description": "Données invalides"
+                    "403": {
+                        "description": "Accès refusé (seul le formateur du cours peut ajouter un quiz)"
+                    },
+                    "422": {
+                        "description": "Erreur de validation (format du payload incorrect)"
                     }
                 },
                 "security": [
@@ -860,19 +988,9 @@
                 "tags": [
                     "Quiz"
                 ],
-                "summary": "Soumettre un quiz avec les réponses de l'utilisateur",
-                "description": "Soumet les réponses de l'utilisateur à un quiz, enregistre les résultats, et calcule le score.",
-                "operationId": "submitQuiz",
-                "parameters": [
-                    {
-                        "name": "course",
-                        "in": "path",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
+                "summary": "Soumettre un quiz et calculer le score",
+                "description": "Permet à un utilisateur (apprenant) de soumettre ses réponses à un quiz. \n *                  Le quiz doit contenir 15 questions, et au moins 12 bonnes réponses (80%) \n *                  sont nécessaires pour valider.",
+                "operationId": "e099fbb72d47e1a5fc0dc937a5e54f3c",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -884,22 +1002,30 @@
                                 ],
                                 "properties": {
                                     "quiz_id": {
+                                        "description": "ID du quiz auquel l'utilisateur répond",
                                         "type": "integer",
                                         "example": 1
                                     },
                                     "answers": {
+                                        "description": "Liste des réponses de l'utilisateur aux questions du quiz",
                                         "type": "array",
                                         "items": {
+                                            "required": [
+                                                "question_id",
+                                                "answer_ids"
+                                            ],
                                             "properties": {
                                                 "question_id": {
+                                                    "description": "ID de la question",
                                                     "type": "integer",
-                                                    "example": 10
+                                                    "example": 101
                                                 },
                                                 "answer_ids": {
+                                                    "description": "IDs des réponses choisies (vide si question de type 'text')",
                                                     "type": "array",
                                                     "items": {
                                                         "type": "integer",
-                                                        "example": 42
+                                                        "example": 501
                                                     }
                                                 }
                                             },
@@ -925,12 +1051,11 @@
                                         },
                                         "score": {
                                             "type": "string",
-                                            "example": "3/5"
+                                            "example": "12 / 15"
                                         },
                                         "percentage": {
                                             "type": "number",
-                                            "format": "float",
-                                            "example": 60
+                                            "example": 80
                                         },
                                         "results": {
                                             "type": "array",
@@ -938,15 +1063,15 @@
                                                 "properties": {
                                                     "question_id": {
                                                         "type": "integer",
-                                                        "example": 10
+                                                        "example": 101
                                                     },
-                                                    "correct_answer_ids": {
+                                                    "selected_answer_ids": {
                                                         "type": "array",
                                                         "items": {
                                                             "type": "integer"
                                                         }
                                                     },
-                                                    "selected_answer_ids": {
+                                                    "correct_answer_ids": {
                                                         "type": "array",
                                                         "items": {
                                                             "type": "integer"
@@ -959,6 +1084,10 @@
                                                 },
                                                 "type": "object"
                                             }
+                                        },
+                                        "progress_percent": {
+                                            "type": "number",
+                                            "example": 100
                                         }
                                     },
                                     "type": "object"
@@ -967,13 +1096,35 @@
                         }
                     },
                     "403": {
-                        "description": "Déjà effectué"
+                        "description": "Accès refusé ou quiz déjà soumis",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Vous avez déjà soumis ce quiz."
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
                     "422": {
-                        "description": "Validation error"
-                    },
-                    "404": {
-                        "description": "Quiz non trouvé"
+                        "description": "Erreur de validation",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "errors": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 },
                 "security": [
