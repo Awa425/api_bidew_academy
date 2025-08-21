@@ -300,8 +300,104 @@ class QuizController extends Controller
  *     )
  * )
  */
-
 public function submit(Request $request)
+{
+    $user = auth()->user();
+
+    $data = $request->validate([
+        'quiz_id' => 'required|exists:quizzes,id',
+        'answers' => 'required|array',
+        'answers.*.question_id' => 'required|exists:questions,id',
+        'answers.*.answer_ids' => 'required|array',
+        'answers.*.answer_ids.*' => 'integer|exists:answers,id'
+    ]);
+
+    $quiz = Quiz::with('questions.answers', 'course')->findOrFail($data['quiz_id']);
+
+    // Vérifier si l'utilisateur a déjà soumis ce quiz ET s'il l'a validé
+    $previousAttempt = $user->userQuizzes()->where('quiz_id', $quiz->id)->latest()->first();
+
+    if ($previousAttempt && $previousAttempt->score >= 80) {
+        return response()->json([
+            'message' => 'Vous avez déjà validé ce quiz et ne pouvez pas le repasser.'
+        ], 403);
+    }
+
+    // Création d'une nouvelle tentative (même s'il a échoué auparavant)
+    $userQuiz = $user->userQuizzes()->create([
+        'quiz_id' => $quiz->id,
+        'score' => 0
+    ]);
+
+    $correctCount = 0;
+    $results = [];
+
+    foreach ($data['answers'] as $response) {
+        $question = $quiz->questions->firstWhere('id', $response['question_id']);
+        if (!$question) continue;
+
+        $correctAnswerIds = $question->answers->where('is_correct', true)->pluck('id')->sort()->values();
+        $selectedAnswerIds = collect($response['answer_ids'])->sort()->values();
+
+        $isCorrect = $selectedAnswerIds->all() === $correctAnswerIds->all();
+        if ($isCorrect) $correctCount++;
+
+        // Sauvegarde dans user_answers
+        foreach ($selectedAnswerIds as $answerId) {
+            $userQuiz->answers()->create([
+                'question_id' => $question->id,
+                'answer_id' => $answerId,
+                'is_correct' => $isCorrect
+            ]);
+        }
+
+        $results[] = [
+            'question_id' => $question->id,
+            'selected_answer_ids' => $selectedAnswerIds,
+            'correct_answer_ids' => $correctAnswerIds,
+            'is_correct' => $isCorrect
+        ];
+    }
+
+    $total = count($quiz->questions);
+    $score = $total > 0 ? round(($correctCount / $total) * 100, 2) : 0;
+
+    // Mise à jour du score
+    $userQuiz->update(['score' => $score]);
+
+    // Vérification du seuil de validation (80%)
+    $minimumCorrect = ceil($total * 0.8);
+    $validated = $correctCount >= $minimumCorrect;
+
+    if (!$validated) {
+        return response()->json([
+            'message' => "Échec : Vous devez obtenir au moins 80% ($minimumCorrect bonnes réponses sur $total).",
+            'score' => "$correctCount / $total",
+            'percentage' => $score,
+            'results' => $results,
+            'validated' => false
+        ], 403);
+    }
+
+    // Mise à jour de la progression à 100% si validé
+    $progress = CourseUserProgress::firstOrNew([
+        'user_id' => $user->id,
+        'course_id' => $quiz->course_id
+    ]);
+    $progress->progress_percent = 100;
+    $progress->save();
+
+    return response()->json([
+        'message' => 'Quiz validé avec succès 🎉',
+        'score' => "$correctCount / $total",
+        'percentage' => $score,
+        'results' => $results,
+        'validated' => true,
+        'progress_percent' => $progress->progress_percent
+    ]);
+}
+
+public function submit_old(Request $request)
 {
     $user = auth()->user();
 
