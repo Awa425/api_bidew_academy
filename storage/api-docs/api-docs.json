@@ -991,6 +991,18 @@
                 "summary": "Soumettre un quiz et calculer le score",
                 "description": "Permet à un utilisateur (apprenant) de soumettre ses réponses à un quiz. \n *                  Le quiz doit contenir 15 questions, et au moins 12 bonnes réponses (80%) \n *                  sont nécessaires pour valider.",
                 "operationId": "e099fbb72d47e1a5fc0dc937a5e54f3c",
+                "parameters": [
+                    {
+                        "name": "course",
+                        "in": "path",
+                        "description": "ID du cours",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
                 "requestBody": {
                     "required": true,
                     "content": {

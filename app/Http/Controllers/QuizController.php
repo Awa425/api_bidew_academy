@@ -31,31 +31,36 @@ class QuizController extends Controller
      *     )
      * )
      */
-    public function index($coursId)
-    { 
-        $user = auth()->user();
 
-        // Si l'utilisateur a le rôle "apprenant", on vérifie sa progression
-        if ($user->role == 'apprenant') {
-            $progress = CourseUserProgress::where('user_id', $user->id)
+     public function index($coursId) 
+{
+    $user = auth()->user();
+
+    // Vérification de la progression pour les apprenants
+    if ($user->role === 'apprenant') {
+        $progress = CourseUserProgress::where('user_id', $user->id)
             ->where('course_id', $coursId)
             ->first();
-            
-            if (!$progress || $progress->progress_percent < 90) {
-                return response()->json([
-                    'message' => 'Vous devez compléter toutes les leçons du cours avant d’accéder au quiz. Vous etes a '. $progress->progress_percent .' %',
-                ], 403);
-            }
+
+        if (!$progress || $progress->progress_percent < 90) {
+            return response()->json([
+                'message' => 'Vous devez compléter toutes les leçons du cours avant d’accéder au quiz. Vous êtes à '. ($progress->progress_percent ?? 0) .' %',
+            ], 403);
         }
-
-        // Si admin, formateur ou apprenant avec progression à 100%, on retourne le quiz
-        $quizzes = Quiz::with('questions.answers')
-            ->where('course_id', $coursId)
-            ->orderBy('id','desc')
-            ->get();
-
-        return response()->json($quizzes->load('questions.answers'));
     }
+
+    // Charger uniquement 15 questions aléatoires par quiz
+    $quizzes = Quiz::with([
+        'questions' => function ($query) {
+            $query->inRandomOrder()->limit(15)->with('answers');
+        }
+    ])
+    ->where('course_id', $coursId)
+    ->orderBy('id', 'desc')
+    ->get();
+
+    return response()->json($quizzes);
+}
 
 /**
  * @OA\Post(
@@ -213,6 +218,32 @@ class QuizController extends Controller
         ], 201);
     }
 
+        public function get_all_quis($coursId)
+    { 
+        $user = auth()->user();
+
+        // Si l'utilisateur a le rôle "apprenant", on vérifie sa progression
+        if ($user->role == 'apprenant') {
+            $progress = CourseUserProgress::where('user_id', $user->id)
+            ->where('course_id', $coursId)
+            ->first();
+            
+            if (!$progress || $progress->progress_percent < 90) {
+                return response()->json([
+                    'message' => 'Vous devez compléter toutes les leçons du cours avant d’accéder au quiz. Vous etes a '. $progress->progress_percent .' %',
+                ], 403);
+            }
+        }
+
+        // Si admin, formateur ou apprenant avec progression à 100%, on retourne le quiz
+        $quizzes = Quiz::with('questions.answers')
+            ->where('course_id', $coursId)
+            ->orderBy('id','desc')
+            ->get();
+
+        return response()->json($quizzes->load('questions.answers'));
+    }
+
     /**
  * @OA\Post(
  *     path="/api/courses/{course}/quizzes/submit",
@@ -222,7 +253,13 @@ class QuizController extends Controller
  *                  sont nécessaires pour valider.",
  *     tags={"Quiz"},
  *     security={{"sanctumAuth":{}}},
- * 
+ *     @OA\Parameter(
+ *         name="course",
+ *         in="path",
+ *         required=true,
+ *         description="ID du cours",
+ *         @OA\Schema(type="integer", example=1)
+ *     ),
  *     @OA\RequestBody(
  *         required=true,
  *         @OA\JsonContent(
@@ -300,7 +337,7 @@ class QuizController extends Controller
  *     )
  * )
  */
-public function submit(Request $request)
+public function submit(Request $request) 
 {
     $user = auth()->user();
 
@@ -314,16 +351,19 @@ public function submit(Request $request)
 
     $quiz = Quiz::with('questions.answers', 'course')->findOrFail($data['quiz_id']);
 
-    // Vérifier si l'utilisateur a déjà soumis ce quiz ET s'il l'a validé
-    $previousAttempt = $user->userQuizzes()->where('quiz_id', $quiz->id)->latest()->first();
+    // Vérifier si l'utilisateur a déjà validé ce quiz
+    $alreadyValidated = $user->userQuizzes()
+        ->where('quiz_id', $quiz->id)
+        ->where('score', '>=', 80)
+        ->exists();
 
-    if ($previousAttempt && $previousAttempt->score >= 80) {
+    if ($alreadyValidated) {
         return response()->json([
-            'message' => 'Vous avez déjà validé ce quiz et ne pouvez pas le repasser.'
+            'message' => 'Vous avez déjà validé ce quiz et ne pouvez plus le repasser.'
         ], 403);
     }
 
-    // Création d'une nouvelle tentative (même s'il a échoué auparavant)
+    // Créer une nouvelle tentative (même s'il a échoué auparavant)
     $userQuiz = $user->userQuizzes()->create([
         'quiz_id' => $quiz->id,
         'score' => 0
@@ -342,7 +382,6 @@ public function submit(Request $request)
         $isCorrect = $selectedAnswerIds->all() === $correctAnswerIds->all();
         if ($isCorrect) $correctCount++;
 
-        // Sauvegarde dans user_answers
         foreach ($selectedAnswerIds as $answerId) {
             $userQuiz->answers()->create([
                 'question_id' => $question->id,
@@ -359,27 +398,27 @@ public function submit(Request $request)
         ];
     }
 
-    $total = count($quiz->questions);
-    $score = $total > 0 ? round(($correctCount / $total) * 100, 2) : 0;
+    // Toujours basé sur 15 questions
+    $totalQuestions = 15;
+    $score = round(($correctCount / $totalQuestions) * 100, 2);
 
-    // Mise à jour du score
+    // Mise à jour du score de cette tentative
     $userQuiz->update(['score' => $score]);
 
-    // Vérification du seuil de validation (80%)
-    $minimumCorrect = ceil($total * 0.8);
-    $validated = $correctCount >= $minimumCorrect;
+    // Validation : minimum 12 bonnes réponses sur 15
+    $validated = $correctCount >= 12;
 
     if (!$validated) {
         return response()->json([
-            'message' => "Échec : Vous devez obtenir au moins 80% ($minimumCorrect bonnes réponses sur $total).",
-            'score' => "$correctCount / $total",
+            'message' => "Échec : Vous devez obtenir au moins 80% (12 bonnes réponses sur 15).",
+            'score' => "$correctCount / $totalQuestions",
             'percentage' => $score,
             'results' => $results,
             'validated' => false
         ], 403);
     }
 
-    // Mise à jour de la progression à 100% si validé
+    // Si validé → mise à jour progression à 100 %
     $progress = CourseUserProgress::firstOrNew([
         'user_id' => $user->id,
         'course_id' => $quiz->course_id
@@ -389,13 +428,15 @@ public function submit(Request $request)
 
     return response()->json([
         'message' => 'Quiz validé avec succès 🎉',
-        'score' => "$correctCount / $total",
+        'score' => "$correctCount / $totalQuestions",
         'percentage' => $score,
         'results' => $results,
         'validated' => true,
         'progress_percent' => $progress->progress_percent
     ]);
 }
+
+
 
 public function submit_old(Request $request)
 {

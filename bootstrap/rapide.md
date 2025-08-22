@@ -274,69 +274,56 @@
 }
 
 # Payload pour submit quiz
-    {
+{
   "quiz_id": 1,
   "answers": [
     {
-      "question_id": 101,
-      "answer_ids": [501] 
+      "question_id": 1,
+      "answer_ids": [1]
     },
     {
-      "question_id": 102,
-      "answer_ids": [505, 506] 
+      "question_id": 2,
+      "answer_ids": [4,5,7]
     },
     {
-      "question_id": 103,
-      "answer_ids": [] 
+      "question_id": 3,
+      "answer_ids": [8]
     },
     {
-      "question_id": 104,
-      "answer_ids": [512]
+      "question_id": 4,
+      "answer_ids": [9]
     },
     {
-      "question_id": 105,
-      "answer_ids": [520, 521]
+      "question_id": 5,
+      "answer_ids": [12,13,15]
     },
     {
-      "question_id": 106,
-      "answer_ids": [530]
+      "question_id": 6,
+      "answer_ids": [16]
     },
     {
-      "question_id": 107,
-      "answer_ids": [540]
+      "question_id": 7,
+      "answer_ids": [17]
     },
     {
-      "question_id": 108,
-      "answer_ids": [545, 546]
+      "question_id": 8,
+      "answer_ids": [20,21]
     },
     {
-      "question_id": 109,
-      "answer_ids": [] 
+      "question_id": 9,
+      "answer_ids": [24]
     },
     {
-      "question_id": 110,
-      "answer_ids": [560]
+      "question_id": 10,
+      "answer_ids": [25]
     },
     {
-      "question_id": 111,
-      "answer_ids": [570, 571]
+      "question_id": 11,
+      "answer_ids": [28,29,31]
     },
     {
-      "question_id": 112,
-      "answer_ids": [580]
-    },
-    {
-      "question_id": 113,
-      "answer_ids": [590, 591]
-    },
-    {
-      "question_id": 114,
-      "answer_ids": [600]
-    },
-    {
-      "question_id": 115,
-      "answer_ids": [] 
+      "question_id": 12,
+      "answer_ids": [32]
     }
   ]
 }
-

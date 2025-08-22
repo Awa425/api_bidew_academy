@@ -82,6 +82,7 @@ Route::middleware(['auth:sanctum','role:admin,formateur'])->group(function () {
 });
 Route::middleware(['auth:sanctum', 'role:admin,formateur,apprenant'])->group(function () {
     Route::get('courses/{course}/quizzes', [QuizController::class, 'index']);
+    Route::get('courses/{course}/quizzes/all', [QuizController::class, 'get_all_quis']);
     Route::post('courses/{course}/quizzes/submit', [QuizController::class, 'submit']);
 });
 
