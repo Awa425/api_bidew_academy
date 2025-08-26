@@ -32,7 +32,19 @@ class QuizController extends Controller
      * )
      */
 
-     public function index($coursId) 
+public function index($coursId) { 
+    $user = auth()->user(); 
+
+    if ($user->role == 'apprenant') { 
+        $progress = CourseUserProgress::where('user_id', $user->id) ->where('course_id', $coursId) ->first(); 
+
+        if (!$progress || $progress->progress_percent < 90) { 
+        return response()->json([ 'message' => 'Vous devez compléter toutes les leçons du cours avant d’accéder au quiz. Vous etes a '. $progress->progress_percent .' %', ], 403); } } 
+
+       $quizzes = Quiz::with('questions.answers') ->where('course_id', $coursId) ->orderBy('id','desc') ->get(); return response()->json($quizzes->load('questions.answers')); 
+    }
+
+     public function index_15_quiz($coursId) 
 {
     $user = auth()->user();
 
