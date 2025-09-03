@@ -319,7 +319,7 @@ public function show(Course $course, Lesson $lesson)
      *     @OA\Response(response=404, description="Leçon non trouvé")
      * )
      */
-       public function destroy(Lesson $lesson)
+    public function destroy(Lesson $lesson)
     {
         $userId = auth()->id();
         $courseUserId = $lesson->course->user_id;

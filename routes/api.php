@@ -38,6 +38,7 @@ Route::middleware(['auth:sanctum', 'role:admin,formateur'])->group(function () {
         Route::get('courses/user/{id}', [CourseController::class, 'getCoursByFormateur']);
     Route::put('courses/{course}', [CourseController::class, 'update']);
     Route::post('courses', [CourseController::class, 'store']);
+    Route::delete('courses/{course}', [CourseController::class, 'destroy']);
 });
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('courses/{id}', [CourseController::class, 'show']);

@@ -331,6 +331,37 @@
                         "sanctumAuth": []
                     }
                 ]
+            },
+            "delete": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Supprimer un cours",
+                "operationId": "9419855e165089a432c2ebb75bfd74b4",
+                "parameters": [
+                    {
+                        "name": "Courses",
+                        "in": "path",
+                        "description": "ID du cours à supprimer",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Cours supprimé avec succès"
+                    },
+                    "404": {
+                        "description": "Cours non trouvé"
+                    }
+                },
+                "security": [
+                    {
+                        "sanctumAuth": []
+                    }
+                ]
             }
         },
         "/api/courses/{id}/start": {

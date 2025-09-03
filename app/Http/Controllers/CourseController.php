@@ -256,9 +256,32 @@ class CourseController extends Controller
         return response()->json(['message' => 'Cours démarré. Première leçon débloquée.']);
     }
 
-
+   /**
+     * @OA\Delete(
+     *     path="/api/courses/{course}",
+     *     summary="Supprimer un cours",
+     *     tags={"Courses"},
+     *     security={{"sanctumAuth":{}}},
+     *     @OA\Parameter(
+     *         name="Courses",
+     *         in="path",
+     *         description="ID du cours à supprimer",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Cours supprimé avec succès"
+     *     ),
+     *     @OA\Response(response=404, description="Cours non trouvé")
+     * )
+     */
     public function destroy(Course $course)
     {
+        if (auth()->id() !== $course->user_id) {
+            return response()->json(['error' => 'Vous n\'avez pas la permission de modifier ce cours.'], 403);
+        }
+        $course->delete();
         return response()->json(null, 204);
     }
 }
